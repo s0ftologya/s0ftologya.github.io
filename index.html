@@ -700,38 +700,51 @@
             background: rgba(139, 0, 0, 0.3);
         }
 
+        /* Оптимизация админ-панели для телефонов */
         .admin-panel {
-            position: fixed; top: 0; left: -100%; width: 100%; max-width: 600px; height: 100vh;
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100vh;
             background: rgba(8, 16, 28, 0.98);
             backdrop-filter: blur(30px);
             border-right: 3px solid #B22222;
-            padding: 20px; transition: 0.3s; z-index: 1001;
-            overflow-y: auto; box-shadow: 10px 0 50px black;
+            padding: 50px 12px 20px;
+            transition: 0.3s;
+            z-index: 1001;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
-        .admin-panel.open { left: 0; }
+        
+        .admin-panel.open {
+            left: 0;
+        }
+        
         .admin-close {
-            position: absolute; top: 12px; right: 12px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
             background: none;
             border: 1px solid #B22222;
             color: #B22222;
             width: 40px;
             height: 40px;
-            border-radius: 12px;
+            border-radius: 10px;
             font-size: 1.5rem;
             cursor: pointer;
-            transition: 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
+            z-index: 1002;
         }
-        .admin-close:hover {
+        
+        .admin-close:active {
             background: #8B0000;
             color: white;
         }
-        .admin-close:active {
-            transform: scale(0.95);
-        }
 
+        /* Увеличение кликабельных областей для мобильных */
         .admin-tabs {
             display: flex;
             flex-wrap: wrap;
@@ -740,23 +753,27 @@
             border-bottom: 1px solid #3a4a60;
             padding-bottom: 10px;
         }
+        
         .admin-tab {
             background: transparent;
             border: none;
             color: #9aafc9;
-            padding: 6px 12px;
-            border-radius: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             transition: 0.2s;
+            flex: 1 0 auto;
+            min-width: 70px;
+            text-align: center;
+            touch-action: manipulation;
         }
-        .admin-tab:hover {
+        
+        .admin-tab:active {
             color: #DC143C;
             background: rgba(180, 40, 40, 0.15);
         }
-        .admin-tab:active {
-            transform: scale(0.95);
-        }
+        
         .admin-tab.active {
             background: #8B0000;
             color: white;
@@ -775,117 +792,163 @@
             border: 1px solid #4a3f60;
             box-shadow: 0 10px 20px -15px black;
         }
-        .admin-form { display: flex; flex-direction: column; gap: 8px; }
-        .admin-form input, .admin-form textarea, .admin-form select {
+        
+        .admin-form { display: flex; flex-direction: column; gap: 10px; }
+        
+        .admin-form input, 
+        .admin-form textarea, 
+        .admin-form select {
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid #8B0000;
-            padding: 10px 14px;
-            border-radius: 16px;
+            padding: 14px 14px;
+            border-radius: 12px;
             color: white;
-            font-size: 0.9rem;
+            font-size: 1rem;
             outline: none;
             transition: 0.2s;
+            width: 100%;
+            -webkit-appearance: none;
+            touch-action: manipulation;
         }
-        .admin-form input:focus, .admin-form textarea:focus {
+        
+        .admin-form input:focus, 
+        .admin-form textarea:focus {
             border-color: #DC143C;
             box-shadow: 0 0 12px #8B0000;
         }
+        
         .admin-form button {
             background: #8B0000;
             border: none;
-            padding: 10px 14px;
-            border-radius: 16px;
+            padding: 16px 14px;
+            border-radius: 12px;
             color: white;
             font-weight: 600;
             cursor: pointer;
             transition: 0.2s;
-            font-size: 0.9rem;
+            font-size: 1rem;
+            width: 100%;
+            min-height: 52px;
+            touch-action: manipulation;
         }
-        .admin-form button:hover {
+        
+        .admin-form button:active {
             background: #B22222;
             box-shadow: 0 0 15px #8B0000;
+            transform: scale(0.98);
         }
-        .admin-form button:active {
-            transform: scale(0.97);
-        }
+        
         .admin-list-item {
             background: rgba(30, 45, 65, 0.6);
-            padding: 8px 12px;
+            padding: 12px 14px;
             border-radius: 12px;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
             border: 1px solid #5f4a70;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            align-items: center;
         }
+        
         .admin-delete { 
-            background: none; border: 1px solid #DC143C; color: #DC143C; 
-            border-radius: 10px; padding: 2px 10px; cursor: pointer;
+            background: none; 
+            border: 1px solid #DC143C; 
+            color: #DC143C; 
+            border-radius: 8px; 
+            padding: 6px 14px; 
+            cursor: pointer;
             transition: 0.2s;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
+            min-width: 44px;
+            touch-action: manipulation;
         }
-        .admin-delete:hover {
+        
+        .admin-delete:active {
             background: #8B0000;
             color: white;
         }
-        .admin-delete:active {
-            transform: scale(0.95);
-        }
+        
         .checkbox-group {
-            display: flex; flex-wrap: wrap; gap: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
             background: rgba(0, 0, 0, 0.3);
-            padding: 12px;
-            border-radius: 16px;
+            padding: 15px;
+            border-radius: 12px;
             border: 1px solid #8B0000;
         }
+        
         .checkbox-item {
-            display: flex; align-items: center; gap: 5px; color: #b0c4de;
-            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #b0c4de;
+            font-size: 0.95rem;
+            padding: 5px 0;
+            min-width: 80px;
         }
-        .image-upload, .file-upload {
+        
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            touch-action: manipulation;
+        }
+        
+        .image-upload, 
+        .file-upload {
             background: rgba(0, 0, 0, 0.3);
-            border-radius: 16px;
-            padding: 10px;
+            border-radius: 12px;
+            padding: 15px;
             border: 1px dashed #B22222;
             margin-bottom: 8px;
         }
-        .image-upload input[type="file"], .file-upload input[type="file"] {
+        
+        .image-upload input[type="file"], 
+        .file-upload input[type="file"] {
             background: transparent;
             border: none;
             color: transparent;
-            padding: 0;
+            padding: 10px 0;
             width: 100%;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
+            touch-action: manipulation;
         }
-        .image-upload input[type="file"]::file-selector-button, .file-upload input[type="file"]::file-selector-button {
+        
+        .image-upload input[type="file"]::file-selector-button, 
+        .file-upload input[type="file"]::file-selector-button {
             background: rgba(139, 0, 0, 0.3);
             border: 1px solid #B22222;
             color: white;
-            padding: 6px 12px;
-            border-radius: 12px;
+            padding: 10px 20px;
+            border-radius: 10px;
             cursor: pointer;
             transition: 0.2s;
+            font-size: 0.95rem;
+            touch-action: manipulation;
         }
-        .image-upload input[type="file"]::file-selector-button:hover, .file-upload input[type="file"]::file-selector-button:hover {
+        
+        .image-upload input[type="file"]::file-selector-button:active, 
+        .file-upload input[type="file"]::file-selector-button:active {
             background: #8B0000;
-        }
-        .image-upload input[type="file"]::file-selector-button:active, .file-upload input[type="file"]::file-selector-button:active {
             transform: scale(0.96);
         }
+        
         .preview-image {
             width: 100%;
-            height: 70px;
-            border-radius: 12px;
-            margin-top: 10px;
+            height: 80px;
+            border-radius: 10px;
+            margin-top: 12px;
             background-size: cover;
             background-position: center;
             border: 1px solid #B22222;
         }
+        
         .tab-order-item {
             background: rgba(30, 45, 65, 0.6);
-            padding: 10px 14px;
-            margin-bottom: 8px;
-            border-radius: 16px;
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            border-radius: 12px;
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
@@ -893,40 +956,63 @@
             border: 1px solid #8B0000;
             gap: 10px;
         }
+        
         .tab-order-controls {
             display: flex;
-            gap: 5px;
+            gap: 8px;
         }
+        
         .tab-order-controls button {
             background: none;
             border: 1px solid #B22222;
             color: #B22222;
-            width: 32px;
-            height: 32px;
+            width: 44px;
+            height: 44px;
             border-radius: 10px;
             margin: 0 2px;
             cursor: pointer;
             transition: 0.2s;
-            font-size: 1rem;
+            font-size: 1.2rem;
+            touch-action: manipulation;
         }
-        .tab-order-controls button:hover:not(:disabled) {
+        
+        .tab-order-controls button:active:not(:disabled) {
             background: #8B0000;
             color: white;
-        }
-        .tab-order-controls button:active:not(:disabled) {
             transform: scale(0.95);
         }
+        
         .tab-order-controls button:disabled {
             opacity: 0.3;
             cursor: not-allowed;
         }
+        
         .url-input {
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid #8B0000;
-            padding: 10px 14px;
-            border-radius: 16px;
+            padding: 14px 16px;
+            border-radius: 12px;
             color: white;
             width: 100%;
+            font-size: 1rem;
+        }
+
+        /* Медиа-запрос для очень маленьких экранов */
+        @media (max-width: 380px) {
+            .admin-tab {
+                font-size: 0.8rem;
+                padding: 8px 6px;
+                min-width: 60px;
+            }
+            
+            .admin-form button {
+                padding: 14px 10px;
+            }
+            
+            .checkbox-item {
+                min-width: 70px;
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>
@@ -1282,7 +1368,36 @@
             }
             
             if (tabName === 'розыгрыши') {
-                renderGiveaways(container);
+                let items = itemsData['розыгрыши'] || [];
+                
+                if (items.length === 0) {
+                    container.innerHTML = '<div class="empty-state">розыгрышей пока нет</div>';
+                    return;
+                }
+                
+                let currentPage = currentPages['розыгрыши'] || 1;
+                let total = Math.ceil(items.length / ITEMS_PER_PAGE) || 1;
+                if (currentPage > total) currentPage = total;
+                let start = (currentPage - 1) * ITEMS_PER_PAGE;
+                let page = items.slice(start, start + ITEMS_PER_PAGE);
+                
+                let grid = '<div class="card-grid">';
+                page.forEach(item => {
+                    let index = items.indexOf(item);
+                    grid += `<div class="card-item" onclick="showItemDetail('розыгрыши', ${index})">
+                        ${item.image ? `<div class="card-image" onclick="event.stopPropagation(); openModal('${item.image}')"><img src="${item.image}"></div>` : ''}
+                        <div class="card-name">${item.name || ''}</div>
+                        <div class="card-meta">${item.prizes || ''}</div>
+                    </div>`;
+                });
+                grid += '</div>';
+                
+                let pagi = '';
+                for (let i = 1; i <= total; i++) {
+                    pagi += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="currentPages['розыгрыши']=${i}; renderPage('розыгрыши');">${i}</button>`;
+                }
+                
+                container.innerHTML = grid + '<div class="pagination">' + pagi + '</div>';
                 return;
             }
             
@@ -1303,39 +1418,6 @@
             `;
             
             renderItems(tabName);
-        }
-
-        function renderGiveaways(container) {
-            let items = itemsData['розыгрыши'] || [];
-            
-            if (items.length === 0) {
-                container.innerHTML = '<div class="empty-state">розыгрышей пока нет</div>';
-                return;
-            }
-            
-            let currentPage = currentPages['розыгрыши'] || 1;
-            let total = Math.ceil(items.length / ITEMS_PER_PAGE) || 1;
-            if (currentPage > total) currentPage = total;
-            let start = (currentPage - 1) * ITEMS_PER_PAGE;
-            let page = items.slice(start, start + ITEMS_PER_PAGE);
-            
-            let grid = '<div class="card-grid">';
-            page.forEach(item => {
-                let index = items.indexOf(item);
-                grid += `<div class="card-item" onclick="showItemDetail('розыгрыши', ${index})">
-                    ${item.image ? `<div class="card-image" onclick="event.stopPropagation(); openModal('${item.image}')"><img src="${item.image}"></div>` : ''}
-                    <div class="card-name">${item.name || ''}</div>
-                    <div class="card-meta">${item.prizes || ''}</div>
-                </div>`;
-            });
-            grid += '</div>';
-            
-            let pagi = '';
-            for (let i = 1; i <= total; i++) {
-                pagi += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="currentPages['розыгрыши']=${i}; renderPage('розыгрыши');">${i}</button>`;
-            }
-            
-            container.innerHTML = grid + '<div class="pagination">' + pagi + '</div>';
         }
 
         window.setCategory = (tabName, cat) => {
@@ -1486,7 +1568,7 @@
             return `
                 <div class="admin-section">
                     <h4 style="color:#B22222; margin-bottom:12px;">порядок вкладок</h4>
-                    <button onclick="addNewTab()" style="width:100%; margin-bottom:15px; background:#8B0000; border:none; padding:10px; border-radius:12px; color:white; cursor:pointer;">➕ создать новую вкладку</button>
+                    <button onclick="addNewTab()" style="width:100%; margin-bottom:15px; background:#8B0000; border:none; padding:12px; border-radius:12px; color:white; cursor:pointer;">➕ создать новую вкладку</button>
                     ${items}
                 </div>
             `;
