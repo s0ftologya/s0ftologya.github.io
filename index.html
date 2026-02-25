@@ -1,0 +1,1754 @@
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>s0fтология · NEO</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background: #03050a;
+            color: #eef5ff;
+            line-height: 1.5;
+            background-image: 
+                radial-gradient(circle at 30% 40%, rgba(180, 20, 20, 0.03) 0%, transparent 45%),
+                radial-gradient(circle at 80% 70%, rgba(0, 20, 50, 0.5) 0%, transparent 60%);
+            min-height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(45deg, rgba(139, 0, 0, 0.02) 0px, rgba(139, 0, 0, 0.02) 2px, transparent 2px, transparent 8px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #1a212e; }
+        ::-webkit-scrollbar-thumb { background: #8B1A1A; border-radius: 4px; }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 0 12px;
+            border-bottom: 1px solid #2d3245;
+            margin-bottom: 15px;
+            position: relative;
+            flex-wrap: wrap;
+        }
+        
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .logo {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #ffffff, #b4ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(180, 40, 40, 0.3);
+            line-height: 1.2;
+        }
+        .logo span {
+            background: linear-gradient(135deg, #B22222, #ff4d4d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px #8B0000;
+        }
+        
+        .logo-sub {
+            font-size: 0.7rem;
+            color: #6a7e9c;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+
+        .menu-toggle {
+            background: none;
+            border: 1px solid #B22222;
+            color: #B22222;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            font-size: 1.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            margin-right: 12px;
+        }
+        .menu-toggle:hover {
+            background: #8B0000;
+            color: white;
+        }
+        .menu-toggle:active {
+            transform: scale(0.95);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 280px;
+            height: 100vh;
+            background: rgba(8, 16, 28, 0.98);
+            backdrop-filter: blur(30px);
+            border-right: 2px solid #B22222;
+            padding: 70px 20px 30px;
+            transition: 0.3s ease;
+            z-index: 1002;
+            box-shadow: 5px 0 30px black;
+            overflow-y: auto;
+        }
+        .side-menu.open {
+            left: 0;
+        }
+        .side-menu-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: 1px solid #B22222;
+            color: #B22222;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .side-menu-close:hover {
+            background: #8B0000;
+            color: white;
+        }
+        .side-menu-close:active {
+            transform: scale(0.95);
+        }
+        .side-menu-item {
+            display: block;
+            width: 100%;
+            padding: 14px 18px;
+            margin-bottom: 10px;
+            background: rgba(20, 30, 45, 0.6);
+            border: 1px solid #4a3f60;
+            border-radius: 12px;
+            color: #b0c4de;
+            text-decoration: none;
+            transition: 0.2s;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1.1rem;
+        }
+        .side-menu-item:hover {
+            border-color: #B22222;
+            background: #2a1f30;
+            color: white;
+        }
+        .side-menu-item:active {
+            transform: scale(0.98);
+        }
+        .side-menu-item.active {
+            background: #8B0000;
+            border-color: #DC143C;
+            color: white;
+        }
+
+        .main-tabs {
+            display: none;
+        }
+
+        .page { display: none; animation: fade 0.2s; }
+        .page.active { display: block; }
+        @keyframes fade { from { opacity: 0.2; } to { opacity: 1; } }
+
+        .about-section {
+            background: rgba(10, 18, 28, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid #4a5a70;
+            border-radius: 20px;
+            padding: 30px 20px;
+            margin: 15px 0 30px;
+            box-shadow: 0 30px 40px -30px #8B0000;
+        }
+        .about-image {
+            width: 150px;
+            height: 150px;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid #B22222;
+            margin-bottom: 20px;
+            box-shadow: 0 0 30px rgba(139, 0, 0, 0.3);
+        }
+        .about-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .about-title {
+            font-size: 2.8rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #fff, #b8d0ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+        .about-text {
+            font-size: 1.1rem;
+            color: #d0e2ff;
+            border-left: 4px solid #B22222;
+            padding-left: 16px;
+        }
+
+        .news-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .news-card {
+            background: rgba(15, 25, 38, 0.7);
+            backdrop-filter: blur(15px);
+            border: 1px solid #4a5f7a;
+            border-radius: 18px;
+            overflow: hidden;
+            transition: 0.3s;
+            box-shadow: 0 15px 25px -20px black;
+            width: 100%;
+        }
+        .news-card:hover {
+            border-color: #B22222;
+            transform: translateY(-4px);
+            box-shadow: 0 20px 30px -15px #8B0000;
+        }
+        .news-image {
+            width: 100%;
+            height: 180px;
+            background: #1f3145;
+            border-bottom: 2px solid #B22222;
+        }
+        .news-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .news-content {
+            padding: 18px;
+        }
+        .news-date {
+            color: #B22222;
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
+        .news-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+        .news-text {
+            color: #b0c8e8;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .sub-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+            margin: 15px 0 20px;
+        }
+        .sub-tab {
+            background: rgba(20, 30, 45, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid #6a758c;
+            color: #d0e6ff;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .sub-tab:hover {
+            border-color: #B22222;
+            background: #2a1f30;
+            color: white;
+            box-shadow: 0 0 15px #8B0000;
+        }
+        .sub-tab:active {
+            transform: scale(0.96);
+        }
+        .sub-tab.active {
+            background: #8B0000;
+            border-color: #DC143C;
+            color: white;
+            box-shadow: 0 5px 15px #8B0000;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6a7e9c;
+            font-size: 1.1rem;
+            background: rgba(20, 30, 45, 0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid #3a4a60;
+            margin: 20px 0;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin: 20px 0;
+        }
+        @media (min-width: 480px) {
+            .card-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (min-width: 768px) {
+            .card-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        .card-item {
+            background: rgba(15, 25, 38, 0.7);
+            backdrop-filter: blur(15px);
+            border: 1px solid #4a5f7a;
+            border-radius: 18px;
+            padding: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 10px 20px -15px black;
+        }
+        .card-item:hover {
+            border-color: #B22222;
+            transform: translateY(-4px);
+            background: #1e2c44;
+            box-shadow: 0 20px 30px -15px #8B0000;
+        }
+        .card-item:active {
+            transform: scale(0.98);
+        }
+        .card-image {
+            width: 100%;
+            height: 120px;
+            border-radius: 14px;
+            margin-bottom: 10px;
+            overflow: hidden;
+            border: 1px solid #5a6f8a;
+        }
+        .card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .card-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #ffffff, #c5d6ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card-meta { color: #9bb0d0; margin-top: 4px; font-size: 0.8rem; }
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 8px;
+        }
+        .tag {
+            background: rgba(139, 0, 0, 0.2);
+            border: 1px solid #B22222;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 0.6rem;
+            color: #ffb5b5;
+        }
+
+        .detail-panel {
+            background: rgba(8, 18, 30, 0.97);
+            backdrop-filter: blur(30px);
+            border: 2px solid #B22222;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 30px 50px -20px #8B0000;
+        }
+        .detail-image {
+            width: 100%;
+            max-width: 200px;
+            height: 180px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            border: 2px solid #B22222;
+            box-shadow: 0 0 30px rgba(139, 0, 0, 0.5);
+        }
+        .detail-image img { width: 100%; height: 100%; object-fit: cover; }
+        .detail-title { font-size: 2.2rem; color: #DC143C; margin-bottom: 12px; }
+        .detail-content {
+            color: #d0e4ff;
+            font-size: 1rem;
+            background: #0a1a28;
+            padding: 18px;
+            border-radius: 16px;
+            margin: 16px 0;
+            white-space: pre-line;
+            border: 1px solid #B22222;
+        }
+        .action-btn {
+            background: linear-gradient(135deg, #8B0000, #B22222);
+            color: white;
+            padding: 10px 30px;
+            border-radius: 16px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid #ff7a7a;
+            box-shadow: 0 5px 20px #8B0000;
+            display: inline-block;
+            transition: 0.2s;
+            font-size: 1rem;
+        }
+        .action-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 8px 30px #B22222;
+        }
+        .action-btn:active {
+            transform: scale(0.97);
+        }
+        .back-btn {
+            background: transparent;
+            border: 1px solid #B22222;
+            color: #B22222;
+            padding: 8px 20px;
+            border-radius: 16px;
+            cursor: pointer;
+            margin-bottom: 12px;
+            transition: 0.2s;
+            font-size: 0.95rem;
+        }
+        .back-btn:hover {
+            background: #8B0000;
+            color: white;
+        }
+        .back-btn:active {
+            transform: scale(0.97);
+        }
+
+        .comments-section {
+            margin-top: 30px;
+            padding-top: 16px;
+            border-top: 2px solid #B22222;
+        }
+        .comments-title {
+            font-size: 1.3rem;
+            color: #B22222;
+            margin-bottom: 16px;
+        }
+        .comment-item {
+            background: rgba(20, 30, 45, 0.5);
+            border: 1px solid #4a3f60;
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        .comment-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            color: #9aafc9;
+            font-size: 0.8rem;
+            gap: 8px;
+        }
+        .comment-id {
+            color: #B22222;
+        }
+        .comment-text {
+            color: #d0e4ff;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+        .comment-delete {
+            background: none;
+            border: 1px solid #DC143C;
+            color: #DC143C;
+            padding: 2px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: 0.2s;
+        }
+        .comment-delete:hover {
+            background: #8B0000;
+            color: white;
+        }
+        .comment-delete:active {
+            transform: scale(0.95);
+        }
+        .comment-form {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .comment-input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #8B0000;
+            padding: 10px 14px;
+            border-radius: 16px;
+            color: white;
+            font-size: 0.95rem;
+            outline: none;
+            resize: vertical;
+            min-height: 70px;
+        }
+        .comment-input:focus {
+            border-color: #DC143C;
+            box-shadow: 0 0 12px #8B0000;
+        }
+        .comment-submit {
+            background: #8B0000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 16px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            width: fit-content;
+            transition: 0.2s;
+            font-size: 0.95rem;
+        }
+        .comment-submit:hover {
+            background: #B22222;
+            box-shadow: 0 0 15px #8B0000;
+        }
+        .comment-submit:active {
+            transform: scale(0.96);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 25px 0 15px;
+            flex-wrap: wrap;
+        }
+        .page-btn {
+            background: #202e40;
+            border: 1px solid #5b6f8a;
+            color: #d0e0f5;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+        .page-btn:hover {
+            border-color: #B22222;
+            background: #2a3850;
+        }
+        .page-btn:active {
+            transform: scale(0.95);
+        }
+        .page-btn.active {
+            background: #8B0000;
+            border-color: #DC143C;
+            box-shadow: 0 0 15px #B22222;
+        }
+
+        .footer {
+            margin-top: 60px;
+            padding: 20px 0 25px;
+            border-top: 1px solid #2f3b4a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+        .footer-tg {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .footer-tg-link {
+            background: rgba(20, 30, 50, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid #6f5c80;
+            padding: 8px 24px;
+            border-radius: 30px;
+            color: white;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+        .footer-tg-link:hover {
+            border-color: #B22222;
+            background: #2f2540;
+            box-shadow: 0 0 25px #8B0000;
+        }
+        .footer-tg-link:active {
+            transform: scale(0.97);
+        }
+        .madeby {
+            color: #6a7e9c;
+            font-size: 0.85rem;
+            letter-spacing: 1.5px;
+            cursor: default;
+        }
+        
+        .admin-strip {
+            position: absolute;
+            bottom: 8px;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: rgba(139, 0, 0, 0.15);
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .admin-strip:hover {
+            background: rgba(139, 0, 0, 0.3);
+        }
+
+        .admin-panel {
+            position: fixed; top: 0; left: -100%; width: 100%; max-width: 600px; height: 100vh;
+            background: rgba(8, 16, 28, 0.98);
+            backdrop-filter: blur(30px);
+            border-right: 3px solid #B22222;
+            padding: 20px; transition: 0.3s; z-index: 1001;
+            overflow-y: auto; box-shadow: 10px 0 50px black;
+        }
+        .admin-panel.open { left: 0; }
+        .admin-close {
+            position: absolute; top: 12px; right: 12px;
+            background: none;
+            border: 1px solid #B22222;
+            color: #B22222;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .admin-close:hover {
+            background: #8B0000;
+            color: white;
+        }
+        .admin-close:active {
+            transform: scale(0.95);
+        }
+
+        .admin-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #3a4a60;
+            padding-bottom: 10px;
+        }
+        .admin-tab {
+            background: transparent;
+            border: none;
+            color: #9aafc9;
+            padding: 6px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+        .admin-tab:hover {
+            color: #DC143C;
+            background: rgba(180, 40, 40, 0.15);
+        }
+        .admin-tab:active {
+            transform: scale(0.95);
+        }
+        .admin-tab.active {
+            background: #8B0000;
+            color: white;
+            box-shadow: 0 0 12px #B22222;
+        }
+
+        .admin-tab-content { display: none; }
+        .admin-tab-content.active { display: block; }
+
+        .admin-section {
+            background: rgba(20, 32, 48, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid #4a3f60;
+            box-shadow: 0 10px 20px -15px black;
+        }
+        .admin-form { display: flex; flex-direction: column; gap: 8px; }
+        .admin-form input, .admin-form textarea, .admin-form select {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #8B0000;
+            padding: 10px 14px;
+            border-radius: 16px;
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
+            transition: 0.2s;
+        }
+        .admin-form input:focus, .admin-form textarea:focus {
+            border-color: #DC143C;
+            box-shadow: 0 0 12px #8B0000;
+        }
+        .admin-form button {
+            background: #8B0000;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 16px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.9rem;
+        }
+        .admin-form button:hover {
+            background: #B22222;
+            box-shadow: 0 0 15px #8B0000;
+        }
+        .admin-form button:active {
+            transform: scale(0.97);
+        }
+        .admin-list-item {
+            background: rgba(30, 45, 65, 0.6);
+            padding: 8px 12px;
+            border-radius: 12px;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            border: 1px solid #5f4a70;
+            font-size: 0.9rem;
+        }
+        .admin-delete { 
+            background: none; border: 1px solid #DC143C; color: #DC143C; 
+            border-radius: 10px; padding: 2px 10px; cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.8rem;
+        }
+        .admin-delete:hover {
+            background: #8B0000;
+            color: white;
+        }
+        .admin-delete:active {
+            transform: scale(0.95);
+        }
+        .checkbox-group {
+            display: flex; flex-wrap: wrap; gap: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px;
+            border-radius: 16px;
+            border: 1px solid #8B0000;
+        }
+        .checkbox-item {
+            display: flex; align-items: center; gap: 5px; color: #b0c4de;
+            font-size: 0.9rem;
+        }
+        .image-upload {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 10px;
+            border: 1px dashed #B22222;
+        }
+        .image-upload input[type="file"] {
+            background: transparent;
+            border: none;
+            color: transparent;
+            padding: 0;
+            width: 100%;
+            font-size: 0.8rem;
+        }
+        .image-upload input[type="file"]::file-selector-button {
+            background: rgba(139, 0, 0, 0.3);
+            border: 1px solid #B22222;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .image-upload input[type="file"]::file-selector-button:hover {
+            background: #8B0000;
+        }
+        .image-upload input[type="file"]::file-selector-button:active {
+            transform: scale(0.96);
+        }
+        .preview-image {
+            width: 100%;
+            height: 70px;
+            border-radius: 12px;
+            margin-top: 10px;
+            background-size: cover;
+            background-position: center;
+            border: 1px solid #B22222;
+        }
+        .tab-order-item {
+            background: rgba(30, 45, 65, 0.6);
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            border-radius: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #8B0000;
+            gap: 10px;
+        }
+        .tab-order-controls {
+            display: flex;
+            gap: 5px;
+        }
+        .tab-order-controls button {
+            background: none;
+            border: 1px solid #B22222;
+            color: #B22222;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            margin: 0 2px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 1rem;
+        }
+        .tab-order-controls button:hover:not(:disabled) {
+            background: #8B0000;
+            color: white;
+        }
+        .tab-order-controls button:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+        .tab-order-controls button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .url-input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #8B0000;
+            padding: 10px 14px;
+            border-radius: 16px;
+            color: white;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="side-menu" id="sideMenu">
+        <button class="side-menu-close" onclick="toggleSideMenu()">✕</button>
+        <div id="sideMenuItems"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <button class="menu-toggle" onclick="toggleSideMenu()">☰</button>
+                <div class="logo-container">
+                    <div class="logo">s0f<span>тология</span></div>
+                    <div class="logo-sub">© все ссылки будут работать только при подписке на телеграмм канал</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="pages-container"></div>
+
+        <div class="footer">
+            <div class="footer-tg">
+                <a href="#" class="footer-tg-link" id="footer-channel" target="_blank">telegram канал</a>
+                <a href="#" class="footer-tg-link" id="footer-chat" target="_blank">telegram чат</a>
+            </div>
+            <div class="madeby">made by cumstat, porezhskiy</div>
+            <div class="admin-strip" ondblclick="showAdminLogin()"></div>
+        </div>
+    </div>
+
+    <div id="admin-panel" class="admin-panel">
+        <button class="admin-close" onclick="closeAdmin()">✕</button>
+        
+        <div class="admin-tabs" id="admin-tabs-container"></div>
+        <div id="admin-tab-contents"></div>
+    </div>
+
+    <script>
+        // Пароль в открытом виде для надежности
+        const ADMIN_PASS = 'ebalay';
+
+        let mainTabs = JSON.parse(localStorage.getItem('mainTabs')) || ['о сайте', 'новости', 'софты', 'мануалы', 'розыгрыши', 'полезные инструменты'];
+        
+        let tabComments = JSON.parse(localStorage.getItem('tabComments')) || {};
+        mainTabs.forEach(tab => {
+            if (tab !== 'о сайте' && tab !== 'новости' && tabComments[tab] === undefined) {
+                tabComments[tab] = true;
+            }
+        });
+        
+        let categoriesData = JSON.parse(localStorage.getItem('categoriesData')) || {};
+        let itemsData = JSON.parse(localStorage.getItem('itemsData')) || {};
+        let news = JSON.parse(localStorage.getItem('news')) || [];
+        
+        let comments = JSON.parse(localStorage.getItem('comments')) || {};
+        
+        let userId = sessionStorage.getItem('commentUserId');
+        if (!userId) {
+            userId = 'user_' + Math.random().toString(36).substr(2, 9);
+            sessionStorage.setItem('commentUserId', userId);
+        }
+        
+        let aboutText = localStorage.getItem('aboutText') || 'проект про софты для пробива, мануалы, закрытые розыгрыши. без цензуры, без воды.';
+        let aboutImage = localStorage.getItem('aboutImage') || '';
+        
+        let tgChannel = localStorage.getItem('tgChannel') || '#';
+        let tgChat = localStorage.getItem('tgChat') || '#';
+
+        let currentMainTab = localStorage.getItem('currentMainTab') || mainTabs[0];
+        
+        mainTabs.forEach(tab => {
+            if (tab === 'о сайте' || tab === 'новости') return;
+            if (!categoriesData[tab]) {
+                if (tab === 'софты') categoriesData[tab] = ['ddos', 'снос', 'докс', 'осинт'];
+                else if (tab === 'мануалы') categoriesData[tab] = ['снос', 'анонимность', 'осинт'];
+                else if (tab === 'полезные инструменты') categoriesData[tab] = ['парсинг', 'брут', 'сканеры'];
+                else categoriesData[tab] = ['общая'];
+            }
+            if (!itemsData[tab]) itemsData[tab] = [];
+        });
+
+        let currentCats = JSON.parse(localStorage.getItem('currentCats')) || {};
+        mainTabs.forEach(tab => {
+            if (tab !== 'о сайте' && tab !== 'новости' && !currentCats[tab]) {
+                currentCats[tab] = categoriesData[tab]?.[0] || '';
+            }
+        });
+
+        let currentPages = JSON.parse(localStorage.getItem('currentPages')) || {};
+        const ITEMS_PER_PAGE = 10;
+
+        function saveAll() {
+            localStorage.setItem('mainTabs', JSON.stringify(mainTabs));
+            localStorage.setItem('tabComments', JSON.stringify(tabComments));
+            localStorage.setItem('categoriesData', JSON.stringify(categoriesData));
+            localStorage.setItem('itemsData', JSON.stringify(itemsData));
+            localStorage.setItem('news', JSON.stringify(news));
+            localStorage.setItem('comments', JSON.stringify(comments));
+            localStorage.setItem('currentCats', JSON.stringify(currentCats));
+            localStorage.setItem('currentPages', JSON.stringify(currentPages));
+            localStorage.setItem('aboutText', aboutText);
+            localStorage.setItem('aboutImage', aboutImage);
+            localStorage.setItem('tgChannel', tgChannel);
+            localStorage.setItem('tgChat', tgChat);
+            localStorage.setItem('currentMainTab', currentMainTab);
+            updateTgLinks();
+            renderEverything();
+        }
+
+        function updateTgLinks() {
+            document.querySelectorAll('#footer-channel').forEach(el => el.href = tgChannel);
+            document.querySelectorAll('#footer-chat').forEach(el => el.href = tgChat);
+        }
+
+        function showAdminLogin() {
+            let pass = prompt('пароль:');
+            if (pass === ADMIN_PASS) {
+                document.getElementById('admin-panel').classList.add('open');
+                renderAdminPanel();
+            } else if (pass !== null) {
+                alert('неверный пароль');
+            }
+        }
+
+        function closeAdmin() {
+            document.getElementById('admin-panel').classList.remove('open');
+        }
+
+        function toggleSideMenu() {
+            document.getElementById('sideMenu').classList.toggle('open');
+        }
+
+        function addComment(tabName, itemId, text) {
+            if (!text.trim()) return;
+            let key = `${tabName}_${itemId}`;
+            if (!comments[key]) comments[key] = [];
+            
+            let comment = {
+                id: Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                text: text.trim(),
+                date: new Date().toLocaleString(),
+                userId: userId
+            };
+            comments[key].push(comment);
+            saveAll();
+            showItemDetail(tabName, itemId);
+        }
+
+        function deleteComment(tabName, itemId, commentId) {
+            let key = `${tabName}_${itemId}`;
+            if (comments[key]) {
+                let comment = comments[key].find(c => c.id === commentId);
+                if (comment && (comment.userId === userId || ADMIN_PASS === 'ebalay')) {
+                    comments[key] = comments[key].filter(c => c.id !== commentId);
+                    if (comments[key].length === 0) delete comments[key];
+                    saveAll();
+                    showItemDetail(tabName, itemId);
+                }
+            }
+        }
+
+        function renderComments(tabName, itemId) {
+            let key = `${tabName}_${itemId}`;
+            let itemComments = comments[key] || [];
+            
+            let html = '<div class="comments-section">';
+            html += '<h3 class="comments-title">комментарии</h3>';
+            
+            if (itemComments.length === 0) {
+                html += '<p style="color:#6a7e9c; margin-bottom:12px;">пока нет комментариев</p>';
+            } else {
+                itemComments.forEach(comment => {
+                    html += `
+                        <div class="comment-item">
+                            <div class="comment-header">
+                                <span class="comment-id">#${comment.id.substr(0, 6)}</span>
+                                <span>${comment.date}</span>
+                                ${(comment.userId === userId || ADMIN_PASS === 'ebalay') ? 
+                                    `<button class="comment-delete" onclick="deleteComment('${tabName}', ${itemId}, '${comment.id}')">✕</button>` : ''}
+                            </div>
+                            <div class="comment-text">${comment.text}</div>
+                        </div>
+                    `;
+                });
+            }
+            
+            if (tabComments[tabName]) {
+                html += `
+                    <div class="comment-form">
+                        <textarea class="comment-input" id="comment-${tabName}-${itemId}" placeholder="анонимный комментарий..."></textarea>
+                        <button class="comment-submit" onclick="addComment('${tabName}', ${itemId}, document.getElementById('comment-${tabName}-${itemId}').value)">отправить</button>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            return html;
+        }
+
+        window.moveTab = (index, direction) => {
+            let newIndex = index + direction;
+            if (newIndex >= 0 && newIndex < mainTabs.length) {
+                [mainTabs[index], mainTabs[newIndex]] = [mainTabs[newIndex], mainTabs[index]];
+                saveAll();
+                renderAdminPanel();
+            }
+        };
+
+        window.renameTab = (oldName, newName) => {
+            if (!newName || newName === oldName) return;
+            let index = mainTabs.indexOf(oldName);
+            if (index !== -1) {
+                mainTabs[index] = newName;
+                if (categoriesData[oldName]) {
+                    categoriesData[newName] = categoriesData[oldName];
+                    delete categoriesData[oldName];
+                }
+                if (itemsData[oldName]) {
+                    itemsData[newName] = itemsData[oldName];
+                    delete itemsData[oldName];
+                }
+                if (tabComments[oldName] !== undefined) {
+                    tabComments[newName] = tabComments[oldName];
+                    delete tabComments[oldName];
+                }
+                if (currentCats[oldName]) {
+                    currentCats[newName] = currentCats[oldName];
+                    delete currentCats[oldName];
+                }
+                saveAll();
+                renderAdminPanel();
+            }
+        };
+
+        window.addNewTab = () => {
+            let name = prompt('введите название новой вкладки:');
+            if (name && !mainTabs.includes(name)) {
+                mainTabs.push(name);
+                categoriesData[name] = ['общая'];
+                itemsData[name] = [];
+                tabComments[name] = true;
+                currentCats[name] = 'общая';
+                saveAll();
+                renderAdminPanel();
+            }
+        };
+
+        window.deleteTab = (tabName) => {
+            if (tabName === 'о сайте' || tabName === 'новости') {
+                alert('нельзя удалить базовые вкладки');
+                return;
+            }
+            if (confirm(`удалить вкладку "${tabName}"?`)) {
+                let index = mainTabs.indexOf(tabName);
+                if (index !== -1) {
+                    mainTabs.splice(index, 1);
+                    delete categoriesData[tabName];
+                    delete itemsData[tabName];
+                    delete tabComments[tabName];
+                    delete currentCats[tabName];
+                    if (currentMainTab === tabName) {
+                        currentMainTab = mainTabs[0];
+                    }
+                    saveAll();
+                    renderAdminPanel();
+                }
+            }
+        };
+
+        function renderMainTabs() {
+            let sideHtml = '';
+            mainTabs.forEach((tab, i) => {
+                sideHtml += `<button class="side-menu-item ${tab === currentMainTab ? 'active' : ''}" onclick="switchMainTab('${tab}'); toggleSideMenu();">${tab}</button>`;
+            });
+            document.getElementById('sideMenuItems').innerHTML = sideHtml;
+        }
+
+        window.switchMainTab = (tabName) => {
+            currentMainTab = tabName;
+            saveAll();
+            renderPage(tabName);
+        };
+
+        function renderPage(tabName) {
+            let container = document.getElementById('pages-container');
+            
+            if (tabName === 'о сайте') {
+                let imageHtml = aboutImage ? `<div class="about-image"><img src="${aboutImage}"></div>` : '';
+                container.innerHTML = `
+                    <div class="about-section">
+                        ${imageHtml}
+                        <div class="about-title">s0f<span>тология</span></div>
+                        <div class="about-text">${aboutText}</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            if (tabName === 'новости') {
+                if (news.length === 0) {
+                    container.innerHTML = '<div class="empty-state">новостей пока нет</div>';
+                    return;
+                }
+                
+                let newsHtml = '<div class="news-list">';
+                news.slice().reverse().forEach(item => {
+                    newsHtml += `
+                        <div class="news-card">
+                            ${item.image ? `<div class="news-image"><img src="${item.image}"></div>` : ''}
+                            <div class="news-content">
+                                <div class="news-date">${item.date || new Date().toLocaleDateString()}</div>
+                                <div class="news-title">${item.title}</div>
+                                <div class="news-text">${item.content}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                newsHtml += '</div>';
+                container.innerHTML = newsHtml;
+                return;
+            }
+            
+            let categories = categoriesData[tabName] || ['общая'];
+            let currentCat = currentCats[tabName] || categories[0];
+            
+            let subTabsHtml = '<div class="sub-tabs">';
+            categories.forEach(cat => {
+                subTabsHtml += `<button class="sub-tab ${cat === currentCat ? 'active' : ''}" onclick="setCategory('${tabName}', '${cat}')">${cat}</button>`;
+            });
+            subTabsHtml += '</div>';
+            
+            container.innerHTML = `
+                ${subTabsHtml}
+                <div id="${tabName}-content"></div>
+                <div id="${tabName}-detail-container"></div>
+                <div id="${tabName}-pagination" class="pagination"></div>
+            `;
+            
+            renderItems(tabName);
+        }
+
+        window.setCategory = (tabName, cat) => {
+            currentCats[tabName] = cat;
+            currentPages[tabName] = 1;
+            saveAll();
+            renderItems(tabName);
+        };
+
+        function renderItems(tabName) {
+            let items = itemsData[tabName] || [];
+            let currentCat = currentCats[tabName] || (categoriesData[tabName]?.[0] || '');
+            let filtered = items.filter(item => item.categories && item.categories.includes(currentCat));
+            
+            if (filtered.length === 0) {
+                document.getElementById(`${tabName}-content`).innerHTML = '<div class="empty-state">здесь пока пусто</div>';
+                document.getElementById(`${tabName}-pagination`).innerHTML = '';
+                return;
+            }
+            
+            let currentPage = currentPages[tabName] || 1;
+            let total = Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1;
+            if (currentPage > total) currentPage = total;
+            let start = (currentPage - 1) * ITEMS_PER_PAGE;
+            let page = filtered.slice(start, start + ITEMS_PER_PAGE);
+            
+            let grid = '<div class="card-grid">';
+            page.forEach(item => {
+                let index = items.indexOf(item);
+                grid += `<div class="card-item" onclick="showItemDetail('${tabName}', ${index})">
+                    ${item.image ? `<div class="card-image"><img src="${item.image}"></div>` : ''}
+                    <div class="card-name">${item.name || ''}</div>
+                    <div class="card-meta">${item.size || item.minutes || ''}</div>
+                    <div class="card-tags">${(item.categories || []).map(c => `<span class="tag">${c}</span>`).join('')}</div>
+                </div>`;
+            });
+            grid += '</div>';
+            
+            document.getElementById(`${tabName}-content`).innerHTML = grid;
+            
+            let pagi = '';
+            for (let i = 1; i <= total; i++) {
+                pagi += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="currentPages['${tabName}']=${i}; renderItems('${tabName}');">${i}</button>`;
+            }
+            document.getElementById(`${tabName}-pagination`).innerHTML = pagi;
+        }
+
+        window.showItemDetail = (tabName, index) => {
+            let item = itemsData[tabName][index];
+            document.getElementById(`${tabName}-content`).style.display = 'none';
+            document.getElementById(`${tabName}-pagination`).style.display = 'none';
+            
+            let detailHtml = `
+                <div class="detail-panel">
+                    <button class="back-btn" onclick="closeItemDetail('${tabName}')">← назад</button>
+                    ${item.image ? `<div class="detail-image"><img src="${item.image}"></div>` : ''}
+                    <div class="detail-title">${item.name}</div>
+                    <div class="detail-content">${item.description || item.text || item.detail || ''}</div>
+            `;
+            
+            if (item.link) {
+                detailHtml += `<a href="${item.link}" class="action-btn" target="_blank">${tabName === 'софты' ? 'установить' : 'скачать'}</a>`;
+            }
+            
+            if (tabComments[tabName]) {
+                detailHtml += renderComments(tabName, index);
+            }
+            
+            detailHtml += '</div>';
+            
+            document.getElementById(`${tabName}-detail-container`).innerHTML = detailHtml;
+        };
+
+        window.closeItemDetail = (tabName) => {
+            document.getElementById(`${tabName}-content`).style.display = 'block';
+            document.getElementById(`${tabName}-pagination`).style.display = 'flex';
+            document.getElementById(`${tabName}-detail-container`).innerHTML = '';
+        };
+
+        function renderEverything() {
+            renderMainTabs();
+            renderPage(currentMainTab);
+        }
+
+        function renderAdminPanel() {
+            let tabsContainer = document.getElementById('admin-tabs-container');
+            let contentsContainer = document.getElementById('admin-tab-contents');
+            
+            let tabsHtml = '';
+            let contentsHtml = '';
+            
+            tabsHtml += `<button class="admin-tab active" onclick="switchAdminTab('order')">порядок</button>`;
+            contentsHtml += `<div class="admin-tab-content active" id="admin-order-tab">${getOrderAdminHtml()}</div>`;
+            
+            tabsHtml += `<button class="admin-tab" onclick="switchAdminTab('about')">о сайте</button>`;
+            contentsHtml += `<div class="admin-tab-content" id="admin-about-tab">${getAboutAdminHtml()}</div>`;
+            
+            tabsHtml += `<button class="admin-tab" onclick="switchAdminTab('news')">новости</button>`;
+            contentsHtml += `<div class="admin-tab-content" id="admin-news-tab">${getNewsAdminHtml()}</div>`;
+            
+            mainTabs.forEach(tab => {
+                if (tab === 'о сайте' || tab === 'новости') return;
+                tabsHtml += `<button class="admin-tab" onclick="switchAdminTab('${tab}')">${tab}</button>`;
+                contentsHtml += `<div class="admin-tab-content" id="admin-${tab}-tab">${getTabAdminHtml(tab)}</div>`;
+            });
+            
+            tabsHtml += `<button class="admin-tab" onclick="switchAdminTab('telegram')">telegram</button>`;
+            contentsHtml += `<div class="admin-tab-content" id="admin-telegram-tab">${getTelegramAdminHtml()}</div>`;
+            
+            tabsContainer.innerHTML = tabsHtml;
+            contentsContainer.innerHTML = contentsHtml;
+        }
+
+        window.switchAdminTab = (tabId) => {
+            document.querySelectorAll('.admin-tab').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.trim() === tabId || 
+                    (tabId === 'order' && btn.textContent.trim() === 'порядок') ||
+                    (tabId === 'about' && btn.textContent.trim() === 'о сайте') ||
+                    (tabId === 'news' && btn.textContent.trim() === 'новости') ||
+                    (tabId === 'telegram' && btn.textContent.trim() === 'telegram'));
+            });
+            document.querySelectorAll('.admin-tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`admin-${tabId}-tab`).classList.add('active');
+        };
+
+        function getOrderAdminHtml() {
+            let items = mainTabs.map((tab, index) => `
+                <div class="tab-order-item">
+                    <span style="flex:1;">${tab}</span>
+                    <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
+                        <button class="admin-delete" onclick="renameTab('${tab}', prompt('новое название:'))">✎</button>
+                        <button class="admin-delete" onclick="deleteTab('${tab}')">✕</button>
+                        <div class="tab-order-controls">
+                            <button onclick="moveTab(${index}, -1)" ${index === 0 ? 'disabled' : ''}>←</button>
+                            <button onclick="moveTab(${index}, 1)" ${index === mainTabs.length - 1 ? 'disabled' : ''}>→</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            return `
+                <div class="admin-section">
+                    <h4 style="color:#B22222; margin-bottom:12px;">порядок вкладок</h4>
+                    <button onclick="addNewTab()" style="width:100%; margin-bottom:15px; background:#8B0000; border:none; padding:10px; border-radius:12px; color:white; cursor:pointer;">➕ создать новую вкладку</button>
+                    ${items}
+                </div>
+            `;
+        }
+
+        function getAboutAdminHtml() {
+            return `
+                <div class="admin-section">
+                    <div class="image-upload">
+                        <input type="file" id="about-image-file" accept="image/*" onchange="previewImage(this, 'about-preview')">
+                        <div id="about-preview" class="preview-image" style="${aboutImage ? `background-image:url(${aboutImage})` : ''}"></div>
+                    </div>
+                    <textarea id="admin-about-text" rows="4" style="width:100%; background:rgba(0,0,0,0.3); border:1px solid #8B0000; border-radius:12px; padding:12px; margin-top:12px; color:white;">${aboutText}</textarea>
+                    <button onclick="saveAbout()" style="margin-top:12px; width:100%;">сохранить</button>
+                </div>
+            `;
+        }
+
+        function getNewsAdminHtml() {
+            let newsList = news.map((item, i) => `
+                <div class="admin-list-item">
+                    <span>${item.title} (${item.date})</span>
+                    <button class="admin-delete" onclick="deleteNews(${i})">✕</button>
+                </div>
+            `).join('');
+            
+            return `
+                <div class="admin-section">
+                    <div class="admin-form">
+                        <input type="text" id="news-title" placeholder="заголовок">
+                        <textarea id="news-content" placeholder="текст новости" rows="3"></textarea>
+                        <div class="image-upload">
+                            <input type="file" id="news-image-file" accept="image/*" onchange="previewImage(this, 'news-preview')">
+                            <div id="news-preview" class="preview-image"></div>
+                        </div>
+                        <button onclick="addNews()">➕ добавить новость</button>
+                    </div>
+                    <div style="margin-top:20px;">${newsList || '<p style="color:#6a7e9c;">нет новостей</p>'}</div>
+                </div>
+            `;
+        }
+
+        function getTabAdminHtml(tabName) {
+            let categories = categoriesData[tabName] || [];
+            let items = itemsData[tabName] || [];
+            
+            let catsHtml = categories.map((cat, i) => `
+                <div class="admin-list-item">${cat}<button class="admin-delete" onclick="deleteCategory('${tabName}', ${i})">✕</button></div>
+            `).join('');
+            
+            let itemsHtml = items.map((item, i) => `
+                <div class="admin-list-item">${item.name}<button class="admin-delete" onclick="deleteItem('${tabName}', ${i})">✕</button></div>
+            `).join('');
+            
+            let checkboxes = categories.map(cat => 
+                `<label class="checkbox-item"><input type="checkbox" value="${cat}"> ${cat}</label>`
+            ).join('');
+            
+            let formFields = '';
+            if (tabName === 'мануалы') {
+                formFields = `
+                    <input type="number" id="${tabName}-minutes" placeholder="минут на чтение">
+                    <textarea id="${tabName}-text" placeholder="текст мануала" rows="3"></textarea>
+                `;
+            } else if (tabName === 'розыгрыши') {
+                formFields = `
+                    <input type="text" id="${tabName}-prizes" placeholder="призы">
+                    <textarea id="${tabName}-detail" placeholder="подробное описание" rows="3"></textarea>
+                `;
+            } else if (tabName === 'полезные инструменты') {
+                formFields = `
+                    <textarea id="${tabName}-desc" placeholder="описание" rows="3"></textarea>
+                    <input type="text" id="${tabName}-link" placeholder="ссылка">
+                `;
+            } else {
+                formFields = `
+                    <input type="text" id="${tabName}-size" placeholder="размер">
+                    <textarea id="${tabName}-desc" placeholder="описание" rows="3"></textarea>
+                    <input type="text" id="${tabName}-link" placeholder="ссылка">
+                `;
+            }
+            
+            return `
+                <div class="admin-section">
+                    <h4 style="color:#B22222;">категории</h4>
+                    <div class="admin-form">
+                        <input type="text" id="new-cat-${tabName}" placeholder="новая категория">
+                        <button onclick="addCategory('${tabName}')">➕ добавить</button>
+                    </div>
+                    ${catsHtml}
+                </div>
+                
+                <div class="admin-section">
+                    <h4 style="color:#B22222;">настройки</h4>
+                    <div class="checkbox-item">
+                        <label>
+                            <input type="checkbox" id="comments-${tabName}" ${tabComments[tabName] ? 'checked' : ''} onchange="toggleComments('${tabName}')">
+                            включить комментарии
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="admin-section">
+                    <h4 style="color:#B22222;">добавить элемент</h4>
+                    <div class="admin-form">
+                        <input type="text" id="${tabName}-name" placeholder="название">
+                        ${formFields}
+                        <div class="image-upload">
+                            <input type="file" id="${tabName}-image-file" accept="image/*" onchange="previewImage(this, '${tabName}-preview')">
+                            <div id="${tabName}-preview" class="preview-image"></div>
+                        </div>
+                        <div class="checkbox-group" id="${tabName}-categories-checkboxes">${checkboxes}</div>
+                        <button onclick="addItem('${tabName}')">➕ добавить</button>
+                    </div>
+                    ${itemsHtml}
+                </div>
+            `;
+        }
+
+        function getTelegramAdminHtml() {
+            return `
+                <div class="admin-section">
+                    <div class="admin-form">
+                        <input type="url" class="url-input" id="admin-tg-channel" placeholder="https://t.me/канал" value="${tgChannel}" pattern="https?://.+">
+                        <input type="url" class="url-input" id="admin-tg-chat" placeholder="https://t.me/чат" value="${tgChat}" pattern="https?://.+">
+                        <button onclick="saveTgLinks()">обновить</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.toggleComments = (tabName) => {
+            tabComments[tabName] = document.getElementById(`comments-${tabName}`).checked;
+            saveAll();
+        };
+
+        window.previewImage = function(input, previewId) {
+            if (input.files && input.files[0]) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById(previewId).style.backgroundImage = `url(${e.target.result})`;
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        };
+
+        window.saveAbout = function() {
+            aboutText = document.getElementById('admin-about-text').value;
+            let file = document.getElementById('about-image-file');
+            if (file.files && file.files[0]) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    aboutImage = e.target.result;
+                    saveAll();
+                };
+                reader.readAsDataURL(file.files[0]);
+            } else saveAll();
+        };
+
+        window.addNews = function() {
+            let title = document.getElementById('news-title').value.trim();
+            let content = document.getElementById('news-content').value.trim();
+            if (!title || !content) return;
+            
+            let date = new Date().toLocaleDateString();
+            let newsItem = { title, content, date };
+            
+            let file = document.getElementById('news-image-file');
+            if (file.files && file.files[0]) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    newsItem.image = e.target.result;
+                    news.push(newsItem);
+                    saveAll();
+                    renderAdminPanel();
+                };
+                reader.readAsDataURL(file.files[0]);
+            } else {
+                news.push(newsItem);
+                saveAll();
+                renderAdminPanel();
+            }
+            
+            document.getElementById('news-title').value = '';
+            document.getElementById('news-content').value = '';
+            document.getElementById('news-preview').style.backgroundImage = '';
+        };
+
+        window.deleteNews = (i) => {
+            news.splice(i, 1);
+            saveAll();
+            renderAdminPanel();
+        };
+
+        window.addCategory = (tabName) => {
+            let val = document.getElementById(`new-cat-${tabName}`).value.trim();
+            if (val && !categoriesData[tabName].includes(val)) {
+                categoriesData[tabName].push(val);
+                saveAll();
+                renderAdminPanel();
+            }
+        };
+
+        window.deleteCategory = (tabName, index) => {
+            categoriesData[tabName].splice(index, 1);
+            saveAll();
+            renderAdminPanel();
+        };
+
+        window.addItem = (tabName) => {
+            console.log('Adding item to', tabName);
+            
+            let name = document.getElementById(`${tabName}-name`)?.value?.trim();
+            if (!name) {
+                alert('Введите название');
+                return;
+            }
+            
+            let item = { name };
+            
+            if (tabName === 'мануалы') {
+                let minutes = document.getElementById(`${tabName}-minutes`)?.value;
+                let text = document.getElementById(`${tabName}-text`)?.value?.trim();
+                
+                if (!text) {
+                    alert('Введите текст мануала');
+                    return;
+                }
+                item.minutes = minutes || '0';
+                item.text = text;
+                
+            } else if (tabName === 'розыгрыши') {
+                let prizes = document.getElementById(`${tabName}-prizes`)?.value?.trim();
+                let detail = document.getElementById(`${tabName}-detail`)?.value?.trim();
+                
+                if (!prizes) {
+                    alert('Введите призы');
+                    return;
+                }
+                if (!detail) {
+                    alert('Введите описание розыгрыша');
+                    return;
+                }
+                item.prizes = prizes;
+                item.detail = detail;
+                
+            } else if (tabName === 'полезные инструменты') {
+                let desc = document.getElementById(`${tabName}-desc`)?.value?.trim();
+                let link = document.getElementById(`${tabName}-link`)?.value?.trim();
+                
+                if (!desc) {
+                    alert('Введите описание');
+                    return;
+                }
+                if (!link) {
+                    alert('Введите ссылку');
+                    return;
+                }
+                item.description = desc;
+                item.link = link;
+                
+            } else {
+                let size = document.getElementById(`${tabName}-size`)?.value?.trim();
+                let desc = document.getElementById(`${tabName}-desc`)?.value?.trim();
+                let link = document.getElementById(`${tabName}-link`)?.value?.trim();
+                
+                if (!size) {
+                    alert('Введите размер');
+                    return;
+                }
+                if (!desc) {
+                    alert('Введите описание');
+                    return;
+                }
+                if (!link) {
+                    alert('Введите ссылку');
+                    return;
+                }
+                item.size = size;
+                item.description = desc;
+                item.link = link;
+            }
+            
+            // Получаем все категории для этой вкладки
+            let allCategories = categoriesData[tabName] || [];
+            
+            // Если категорий нет, создаем хотя бы одну "общую"
+            if (allCategories.length === 0) {
+                allCategories = ['общая'];
+                categoriesData[tabName] = allCategories;
+            }
+            
+            // Для полезных инструментов используем отдельную логику
+            if (tabName === 'полезные инструменты') {
+                // Ищем чекбоксы для этой вкладки
+                let checkboxes = document.querySelectorAll(`#${tabName}-categories-checkboxes input[type="checkbox"]:checked`);
+                
+                if (checkboxes.length === 0) {
+                    // Если нет выбранных категорий, используем первую доступную категорию
+                    if (allCategories.length > 0) {
+                        item.categories = [allCategories[0]];
+                        console.log('Автоматически выбрана категория:', allCategories[0]);
+                    } else {
+                        alert('Сначала создайте хотя бы одну категорию во вкладке "категории"');
+                        return;
+                    }
+                } else {
+                    item.categories = Array.from(checkboxes).map(cb => cb.value);
+                }
+            } else {
+                // Для остальных вкладок
+                let checkboxes = document.querySelectorAll(`#${tabName}-categories-checkboxes input[type="checkbox"]:checked`);
+                item.categories = Array.from(checkboxes).map(cb => cb.value);
+                
+                if (item.categories.length === 0) {
+                    alert('Выберите хотя бы одну категорию');
+                    return;
+                }
+            }
+            
+            let file = document.getElementById(`${tabName}-image-file`);
+            if (file?.files && file.files[0]) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    item.image = e.target.result;
+                    itemsData[tabName].push(item);
+                    saveAll();
+                    renderAdminPanel();
+                };
+                reader.readAsDataURL(file.files[0]);
+            } else {
+                itemsData[tabName].push(item);
+                saveAll();
+                renderAdminPanel();
+            }
+            
+            // Очистка полей
+            document.getElementById(`${tabName}-name`).value = '';
+            
+            if (tabName === 'мануалы') {
+                document.getElementById(`${tabName}-minutes`).value = '';
+                document.getElementById(`${tabName}-text`).value = '';
+            } else if (tabName === 'розыгрыши') {
+                document.getElementById(`${tabName}-prizes`).value = '';
+                document.getElementById(`${tabName}-detail`).value = '';
+            } else if (tabName === 'полезные инструменты') {
+                document.getElementById(`${tabName}-desc`).value = '';
+                document.getElementById(`${tabName}-link`).value = '';
+            } else {
+                document.getElementById(`${tabName}-size`).value = '';
+                document.getElementById(`${tabName}-desc`).value = '';
+                document.getElementById(`${tabName}-link`).value = '';
+            }
+            
+            // Снимаем все чекбоксы
+            let allCheckboxes = document.querySelectorAll(`#${tabName}-categories-checkboxes input[type="checkbox"]`);
+            allCheckboxes.forEach(cb => cb.checked = false);
+            
+            let preview = document.getElementById(`${tabName}-preview`);
+            if (preview) {
+                preview.style.backgroundImage = '';
+            }
+        };
+
+        window.deleteItem = (tabName, index) => {
+            itemsData[tabName].splice(index, 1);
+            saveAll();
+            renderAdminPanel();
+        };
+
+        window.saveTgLinks = () => {
+            tgChannel = document.getElementById('admin-tg-channel').value;
+            tgChat = document.getElementById('admin-tg-chat').value;
+            saveAll();
+        };
+
+        window.addComment = addComment;
+        window.deleteComment = deleteComment;
+
+        renderEverything();
+        updateTgLinks();
+    </script>
+</body>
+</html>
+```
