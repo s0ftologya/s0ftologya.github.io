@@ -710,7 +710,7 @@
             background: rgba(8, 16, 28, 0.98);
             backdrop-filter: blur(30px);
             border-right: 3px solid #B22222;
-            padding: 50px 12px 20px;
+            padding: 50px 12px 80px; /* Увеличил нижний отступ для кнопки */
             transition: 0.3s;
             z-index: 1001;
             overflow-y: auto;
@@ -830,6 +830,9 @@
             width: 100%;
             min-height: 52px;
             touch-action: manipulation;
+            margin-top: 10px;
+            position: relative;
+            z-index: 10;
         }
         
         .admin-form button:active {
@@ -1013,6 +1016,11 @@
                 min-width: 70px;
                 font-size: 0.85rem;
             }
+        }
+
+        /* Дополнительный отступ снизу для последней кнопки */
+        .admin-section:last-child {
+            margin-bottom: 30px;
         }
     </style>
 </head>
