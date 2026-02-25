@@ -1023,8 +1023,9 @@
 
         let currentMainTab = localStorage.getItem('currentMainTab') || mainTabs[0];
         
+        // Инициализация категорий для вкладок (кроме розыгрышей)
         mainTabs.forEach(tab => {
-            if (tab === 'о сайте' || tab === 'новости') return;
+            if (tab === 'о сайте' || tab === 'новости' || tab === 'розыгрыши') return;
             if (!categoriesData[tab]) {
                 if (tab === 'софты') categoriesData[tab] = ['ddos', 'снос', 'докс', 'осинт'];
                 else if (tab === 'мануалы') categoriesData[tab] = ['снос', 'анонимность', 'осинт'];
@@ -1034,9 +1035,14 @@
             if (!itemsData[tab]) itemsData[tab] = [];
         });
 
+        // Для розыгрышей создаем отдельно (без категорий)
+        if (!itemsData['розыгрыши']) {
+            itemsData['розыгрыши'] = [];
+        }
+
         let currentCats = JSON.parse(localStorage.getItem('currentCats')) || {};
         mainTabs.forEach(tab => {
-            if (tab !== 'о сайте' && tab !== 'новости' && !currentCats[tab]) {
+            if (tab !== 'о сайте' && tab !== 'новости' && tab !== 'розыгрыши' && !currentCats[tab]) {
                 currentCats[tab] = categoriesData[tab]?.[0] || '';
             }
         });
@@ -1275,6 +1281,11 @@
                 return;
             }
             
+            if (tabName === 'розыгрыши') {
+                renderGiveaways(container);
+                return;
+            }
+            
             let categories = categoriesData[tabName] || ['общая'];
             let currentCat = currentCats[tabName] || categories[0];
             
@@ -1292,6 +1303,39 @@
             `;
             
             renderItems(tabName);
+        }
+
+        function renderGiveaways(container) {
+            let items = itemsData['розыгрыши'] || [];
+            
+            if (items.length === 0) {
+                container.innerHTML = '<div class="empty-state">розыгрышей пока нет</div>';
+                return;
+            }
+            
+            let currentPage = currentPages['розыгрыши'] || 1;
+            let total = Math.ceil(items.length / ITEMS_PER_PAGE) || 1;
+            if (currentPage > total) currentPage = total;
+            let start = (currentPage - 1) * ITEMS_PER_PAGE;
+            let page = items.slice(start, start + ITEMS_PER_PAGE);
+            
+            let grid = '<div class="card-grid">';
+            page.forEach(item => {
+                let index = items.indexOf(item);
+                grid += `<div class="card-item" onclick="showItemDetail('розыгрыши', ${index})">
+                    ${item.image ? `<div class="card-image" onclick="event.stopPropagation(); openModal('${item.image}')"><img src="${item.image}"></div>` : ''}
+                    <div class="card-name">${item.name || ''}</div>
+                    <div class="card-meta">${item.prizes || ''}</div>
+                </div>`;
+            });
+            grid += '</div>';
+            
+            let pagi = '';
+            for (let i = 1; i <= total; i++) {
+                pagi += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="currentPages['розыгрыши']=${i}; renderPage('розыгрыши');">${i}</button>`;
+            }
+            
+            container.innerHTML = grid + '<div class="pagination">' + pagi + '</div>';
         }
 
         window.setCategory = (tabName, cat) => {
@@ -1354,7 +1398,7 @@
             if (item.fileContent) {
                 detailHtml += `<div class="file-content">${item.fileContent}</div>`;
             } else {
-                detailHtml += `<div class="detail-content">${item.description || item.text || item.detail || ''}</div>`;
+                detailHtml += `<div class="detail-content">${item.description || item.text || item.detail || item.prizes || ''}</div>`;
             }
             
             if (item.link) {
@@ -1486,15 +1530,38 @@
         }
 
         function getTabAdminHtml(tabName) {
-            let categories = categoriesData[tabName] || [];
             let items = itemsData[tabName] || [];
-            
-            let catsHtml = categories.map((cat, i) => `
-                <div class="admin-list-item">${cat}<button class="admin-delete" onclick="deleteCategory('${tabName}', ${i})">✕</button></div>
+            let itemsHtml = items.map((item, i) => `
+                <div class="admin-list-item">
+                    <span>${item.name}</span>
+                    <button class="admin-delete" onclick="deleteItem('${tabName}', ${i})">✕</button>
+                </div>
             `).join('');
             
-            let itemsHtml = items.map((item, i) => `
-                <div class="admin-list-item">${item.name}<button class="admin-delete" onclick="deleteItem('${tabName}', ${i})">✕</button></div>
+            // Для розыгрышей отдельная упрощенная форма
+            if (tabName === 'розыгрыши') {
+                return `
+                    <div class="admin-section">
+                        <h4 style="color:#B22222;">добавить розыгрыш</h4>
+                        <div class="admin-form">
+                            <input type="text" id="${tabName}-name" placeholder="название розыгрыша">
+                            <input type="text" id="${tabName}-prizes" placeholder="призы">
+                            <textarea id="${tabName}-detail" placeholder="подробное описание" rows="3"></textarea>
+                            <div class="image-upload">
+                                <input type="file" id="${tabName}-image-file" accept="image/*" onchange="previewImage(this, '${tabName}-preview')">
+                                <div id="${tabName}-preview" class="preview-image"></div>
+                            </div>
+                            <button onclick="addItem('${tabName}')">➕ добавить</button>
+                        </div>
+                        ${itemsHtml}
+                    </div>
+                `;
+            }
+            
+            // Для остальных вкладок
+            let categories = categoriesData[tabName] || [];
+            let catsHtml = categories.map((cat, i) => `
+                <div class="admin-list-item">${cat}<button class="admin-delete" onclick="deleteCategory('${tabName}', ${i})">✕</button></div>
             `).join('');
             
             let checkboxes = categories.map(cat => 
@@ -1506,11 +1573,6 @@
                 formFields = `
                     <input type="number" id="${tabName}-minutes" placeholder="минут на чтение (только число)">
                     <textarea id="${tabName}-text" placeholder="текст мануала" rows="3"></textarea>
-                `;
-            } else if (tabName === 'розыгрыши') {
-                formFields = `
-                    <input type="text" id="${tabName}-prizes" placeholder="призы">
-                    <textarea id="${tabName}-detail" placeholder="подробное описание" rows="3"></textarea>
                 `;
             } else if (tabName === 'полезные инструменты') {
                 formFields = `
@@ -1554,10 +1616,12 @@
                             <input type="file" id="${tabName}-image-file" accept="image/*" onchange="previewImage(this, '${tabName}-preview')">
                             <div id="${tabName}-preview" class="preview-image"></div>
                         </div>
+                        ${(tabName === 'мануалы' || tabName === 'полезные инструменты') ? `
                         <div class="file-upload">
                             <input type="file" id="${tabName}-file" accept=".txt" onchange="previewTextFile(this, '${tabName}')">
                             <div id="${tabName}-file-name" style="color:#9aafc9; margin-top:5px;"></div>
                         </div>
+                        ` : ''}
                         <div class="checkbox-group" id="${tabName}-categories-checkboxes">${checkboxes}</div>
                         <button onclick="addItem('${tabName}')">➕ добавить</button>
                     </div>
@@ -1675,24 +1739,7 @@
             let item = { name };
             let hasFile = false;
             
-            if (tabName === 'мануалы') {
-                let minutes = document.getElementById(`${tabName}-minutes`)?.value;
-                let text = document.getElementById(`${tabName}-text`)?.value?.trim();
-                
-                // Проверяем, есть ли файл
-                let fileInput = document.getElementById(`${tabName}-file`);
-                if (fileInput?.files && fileInput.files[0]) {
-                    hasFile = true;
-                    // Файл будет обработан позже
-                } else if (!text) {
-                    alert('Введите текст мануала или загрузите файл');
-                    return;
-                }
-                
-                item.minutes = minutes || '0';
-                if (text) item.text = text;
-                
-            } else if (tabName === 'розыгрыши') {
+            if (tabName === 'розыгрыши') {
                 let prizes = document.getElementById(`${tabName}-prizes`)?.value?.trim();
                 let detail = document.getElementById(`${tabName}-detail`)?.value?.trim();
                 
@@ -1706,6 +1753,34 @@
                 }
                 item.prizes = prizes;
                 item.detail = detail;
+                
+                // Для розыгрышей не нужно выбирать категории
+                item.categories = ['розыгрыши'];
+                
+            } else if (tabName === 'мануалы') {
+                let minutes = document.getElementById(`${tabName}-minutes`)?.value;
+                let text = document.getElementById(`${tabName}-text`)?.value?.trim();
+                
+                // Проверяем, есть ли файл
+                let fileInput = document.getElementById(`${tabName}-file`);
+                if (fileInput?.files && fileInput.files[0]) {
+                    hasFile = true;
+                } else if (!text) {
+                    alert('Введите текст мануала или загрузите файл');
+                    return;
+                }
+                
+                item.minutes = minutes || '0';
+                if (text) item.text = text;
+                
+                // Получаем категории
+                let checkboxes = document.querySelectorAll(`#${tabName}-categories-checkboxes input[type="checkbox"]:checked`);
+                item.categories = Array.from(checkboxes).map(cb => cb.value);
+                
+                if (item.categories.length === 0) {
+                    alert('Выберите хотя бы одну категорию');
+                    return;
+                }
                 
             } else if (tabName === 'полезные инструменты') {
                 let desc = document.getElementById(`${tabName}-desc`)?.value?.trim();
@@ -1723,7 +1798,17 @@
                 if (desc) item.description = desc;
                 if (link) item.link = link;
                 
+                // Получаем категории
+                let checkboxes = document.querySelectorAll(`#${tabName}-categories-checkboxes input[type="checkbox"]:checked`);
+                item.categories = Array.from(checkboxes).map(cb => cb.value);
+                
+                if (item.categories.length === 0) {
+                    alert('Выберите хотя бы одну категорию');
+                    return;
+                }
+                
             } else {
+                // Софты и другие вкладки
                 let size = document.getElementById(`${tabName}-size`)?.value?.trim();
                 let desc = document.getElementById(`${tabName}-desc`)?.value?.trim();
                 let link = document.getElementById(`${tabName}-link`)?.value?.trim();
@@ -1743,36 +1828,8 @@
                 item.size = size;
                 item.description = desc;
                 item.link = link;
-            }
-            
-            // Получаем все категории для этой вкладки
-            let allCategories = categoriesData[tabName] || [];
-            
-            // Если категорий нет, создаем хотя бы одну "общую"
-            if (allCategories.length === 0) {
-                allCategories = ['общая'];
-                categoriesData[tabName] = allCategories;
-            }
-            
-            // Для полезных инструментов используем отдельную логику
-            if (tabName === 'полезные инструменты') {
-                // Ищем чекбоксы для этой вкладки
-                let checkboxes = document.querySelectorAll(`#${tabName}-categories-checkboxes input[type="checkbox"]:checked`);
                 
-                if (checkboxes.length === 0) {
-                    // Если нет выбранных категорий, используем первую доступную категорию
-                    if (allCategories.length > 0) {
-                        item.categories = [allCategories[0]];
-                        console.log('Автоматически выбрана категория:', allCategories[0]);
-                    } else {
-                        alert('Сначала создайте хотя бы одну категорию во вкладке "категории"');
-                        return;
-                    }
-                } else {
-                    item.categories = Array.from(checkboxes).map(cb => cb.value);
-                }
-            } else {
-                // Для остальных вкладок
+                // Получаем категории
                 let checkboxes = document.querySelectorAll(`#${tabName}-categories-checkboxes input[type="checkbox"]:checked`);
                 item.categories = Array.from(checkboxes).map(cb => cb.value);
                 
@@ -1781,10 +1838,6 @@
                     return;
                 }
             }
-            
-            // Обработка файлов
-            let imageFile = document.getElementById(`${tabName}-image-file`);
-            let textFile = document.getElementById(`${tabName}-file`);
             
             // Функция для завершения добавления
             function finalizeItem() {
@@ -1795,12 +1848,12 @@
                 // Очистка полей
                 document.getElementById(`${tabName}-name`).value = '';
                 
-                if (tabName === 'мануалы') {
-                    document.getElementById(`${tabName}-minutes`).value = '';
-                    document.getElementById(`${tabName}-text`).value = '';
-                } else if (tabName === 'розыгрыши') {
+                if (tabName === 'розыгрыши') {
                     document.getElementById(`${tabName}-prizes`).value = '';
                     document.getElementById(`${tabName}-detail`).value = '';
+                } else if (tabName === 'мануалы') {
+                    document.getElementById(`${tabName}-minutes`).value = '';
+                    document.getElementById(`${tabName}-text`).value = '';
                 } else if (tabName === 'полезные инструменты') {
                     document.getElementById(`${tabName}-desc`).value = '';
                     document.getElementById(`${tabName}-link`).value = '';
@@ -1811,8 +1864,10 @@
                 }
                 
                 // Снимаем все чекбоксы
-                let allCheckboxes = document.querySelectorAll(`#${tabName}-categories-checkboxes input[type="checkbox"]`);
-                allCheckboxes.forEach(cb => cb.checked = false);
+                if (tabName !== 'розыгрыши') {
+                    let allCheckboxes = document.querySelectorAll(`#${tabName}-categories-checkboxes input[type="checkbox"]`);
+                    allCheckboxes.forEach(cb => cb.checked = false);
+                }
                 
                 let preview = document.getElementById(`${tabName}-preview`);
                 if (preview) {
@@ -1826,13 +1881,15 @@
             }
             
             // Обработка изображения
+            let imageFile = document.getElementById(`${tabName}-image-file`);
             if (imageFile?.files && imageFile.files[0]) {
                 let reader = new FileReader();
                 reader.onload = function(e) {
                     item.image = e.target.result;
                     
-                    // Обработка текстового файла
-                    if (textFile?.files && textFile.files[0]) {
+                    // Обработка текстового файла (только для мануалов и полезных инструментов)
+                    if ((tabName === 'мануалы' || tabName === 'полезные инструменты') && hasFile) {
+                        let textFile = document.getElementById(`${tabName}-file`);
                         let textReader = new FileReader();
                         textReader.onload = function(e) {
                             item.fileContent = e.target.result;
@@ -1844,8 +1901,9 @@
                     }
                 };
                 reader.readAsDataURL(imageFile.files[0]);
-            } else if (textFile?.files && textFile.files[0]) {
+            } else if ((tabName === 'мануалы' || tabName === 'полезные инструменты') && hasFile) {
                 // Только текстовый файл
+                let textFile = document.getElementById(`${tabName}-file`);
                 let reader = new FileReader();
                 reader.onload = function(e) {
                     item.fileContent = e.target.result;
