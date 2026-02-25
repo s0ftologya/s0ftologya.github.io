@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>s0fтология · NEO</title>
+    <title>s0fтология · FIREBASE</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -873,7 +876,7 @@
         .checkbox-group {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
             background: rgba(0, 0, 0, 0.3);
             padding: 15px;
             border-radius: 12px;
@@ -886,15 +889,34 @@
             gap: 8px;
             color: #b0c4de;
             font-size: 0.95rem;
-            padding: 5px 0;
+            padding: 8px 12px;
             min-width: 80px;
+            background: rgba(139, 0, 0, 0.1);
+            border-radius: 8px;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .checkbox-item:hover {
+            background: rgba(139, 0, 0, 0.2);
+            border-color: #8B0000;
+        }
+        
+        .checkbox-item.selected {
+            background: #8B0000;
+            color: white;
+            border-color: #DC143C;
+            box-shadow: 0 0 10px #8B0000;
         }
         
         .checkbox-item input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             margin-right: 5px;
-            touch-action: manipulation;
+            accent-color: #B22222;
+            cursor: pointer;
+            display: none; /* Скрываем стандартный чекбокс */
         }
         
         .image-upload, 
@@ -1013,6 +1035,7 @@
             .checkbox-item {
                 min-width: 70px;
                 font-size: 0.85rem;
+                padding: 6px 8px;
             }
         }
 
@@ -1061,75 +1084,47 @@
     </div>
 
     <script>
-        // Функции для модального окна
-        function openModal(imageSrc) {
-            document.getElementById('modalImage').src = imageSrc;
-            document.getElementById('imageModal').classList.add('active');
+        // ===== ИНИЦИАЛИЗАЦИЯ FIREBASE С ТВОИМИ КЛЮЧАМИ =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyCcJ5VCe6BasMWCwhd-hc8DuCKLNNSj_AA",
+            authDomain: "s0ftologya.firebaseapp.com",
+            databaseURL: "https://s0ftologya-default-rtdb.firebaseio.com",
+            projectId: "s0ftologya",
+            storageBucket: "s0ftologya.firebasestorage.app",
+            messagingSenderId: "259432924969",
+            appId: "1:259432924969:web:4a402a8959e95941ca9938",
+            measurementId: "G-KMHQMRXX95"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // ===== ФУНКЦИИ ДЛЯ РАБОТЫ С FIREBASE =====
+        function saveToFirebase(path, data) {
+            return database.ref(path).set(data);
         }
-        
-        function closeModal() {
-            document.getElementById('imageModal').classList.remove('active');
+
+        function loadFromFirebase(path, callback) {
+            database.ref(path).on('value', (snapshot) => {
+                callback(snapshot.val());
+            });
         }
 
-        // Функция для форматирования минут
-        function formatMinutes(minutes) {
-            const num = parseInt(minutes) || 0;
-            if (num >= 11 && num <= 19) return num + ' минут';
-            const lastDigit = num % 10;
-            if (lastDigit === 1) return num + ' минута';
-            if (lastDigit >= 2 && lastDigit <= 4) return num + ' минуты';
-            return num + ' минут';
-        }
-
-        // Пароль в открытом виде для надежности
-        const ADMIN_PASS = 'ebalay';
-
-        // ===== ЗАГРУЗКА ДАННЫХ ИЗ LOCALSTORAGE =====
-        // Эти данные будут одинаковыми для всех пользователей, так как хранятся в localStorage сайта
-        let mainTabs = JSON.parse(localStorage.getItem('mainTabs')) || ['о сайте', 'новости', 'софты', 'мануалы', 'розыгрыши', 'полезные инструменты'];
-        
-        let tabComments = JSON.parse(localStorage.getItem('tabComments')) || {};
-        
-        let categoriesData = JSON.parse(localStorage.getItem('categoriesData')) || {};
-        let itemsData = JSON.parse(localStorage.getItem('itemsData')) || {};
-        let news = JSON.parse(localStorage.getItem('news')) || [];
-        
-        let comments = JSON.parse(localStorage.getItem('comments')) || {};
-        
-        // Данные о сайте
-        let aboutText = localStorage.getItem('aboutText') || 'проект про софты для пробива, мануалы, закрытые розыгрыши. без цензуры, без воды.';
-        let aboutImage = localStorage.getItem('aboutImage') || '';
-        
-        // Telegram ссылки
-        let tgChannel = localStorage.getItem('tgChannel') || '#';
-        let tgChat = localStorage.getItem('tgChat') || '#';
-
-        // ===== ИНИЦИАЛИЗАЦИЯ =====
-        mainTabs.forEach(tab => {
-            if (tab === 'о сайте' || tab === 'новости' || tab === 'розыгрыши') return;
-            if (!categoriesData[tab]) {
-                if (tab === 'софты') categoriesData[tab] = ['ddos', 'снос', 'докс', 'осинт'];
-                else if (tab === 'мануалы') categoriesData[tab] = ['снос', 'анонимность', 'осинт'];
-                else if (tab === 'полезные инструменты') categoriesData[tab] = ['парсинг', 'брут', 'сканеры'];
-                else categoriesData[tab] = ['общая'];
-            }
-            if (!itemsData[tab]) itemsData[tab] = [];
-        });
-
-        // Для розыгрышей
-        if (!itemsData['розыгрыши']) {
-            itemsData['розыгрыши'] = [];
-        }
+        // ===== ДАННЫЕ =====
+        let mainTabs = ['о сайте', 'новости', 'софты', 'мануалы', 'розыгрыши', 'полезные инструменты'];
+        let tabComments = {};
+        let categoriesData = {};
+        let itemsData = {};
+        let news = [];
+        let comments = {};
+        let aboutText = 'проект про софты для пробива, мануалы, закрытые розыгрыши. без цензуры, без воды.';
+        let aboutImage = '';
+        let tgChannel = '#';
+        let tgChat = '#';
 
         // Текущие выбранные категории (только для текущего пользователя)
         let currentCats = JSON.parse(localStorage.getItem('currentCats')) || {};
-        mainTabs.forEach(tab => {
-            if (tab !== 'о сайте' && tab !== 'новости' && tab !== 'розыгрыши' && !currentCats[tab]) {
-                currentCats[tab] = categoriesData[tab]?.[0] || '';
-            }
-        });
-
-        // Текущие страницы пагинации (только для текущего пользователя)
         let currentPages = JSON.parse(localStorage.getItem('currentPages')) || {};
         const ITEMS_PER_PAGE = 10;
 
@@ -1140,31 +1135,117 @@
             sessionStorage.setItem('commentUserId', userId);
         }
 
-        // Текущая выбранная вкладка (только для текущего пользователя)
+        // Текущая выбранная вкладка
         let currentMainTab = localStorage.getItem('currentMainTab') || mainTabs[0];
 
-        // ===== СОХРАНЕНИЕ =====
-        function saveAll() {
-            // Сохраняем данные, которые должны быть видны всем
-            localStorage.setItem('mainTabs', JSON.stringify(mainTabs));
-            localStorage.setItem('tabComments', JSON.stringify(tabComments));
-            localStorage.setItem('categoriesData', JSON.stringify(categoriesData));
-            localStorage.setItem('itemsData', JSON.stringify(itemsData));
-            localStorage.setItem('news', JSON.stringify(news));
-            localStorage.setItem('comments', JSON.stringify(comments));
-            localStorage.setItem('aboutText', aboutText);
-            localStorage.setItem('aboutImage', aboutImage);
-            localStorage.setItem('tgChannel', tgChannel);
-            localStorage.setItem('tgChat', tgChat);
+        // ===== ЗАГРУЗКА ДАННЫХ ИЗ FIREBASE =====
+        function loadAllFromFirebase() {
+            loadFromFirebase('mainTabs', (data) => {
+                if (data) mainTabs = data;
+                renderEverything();
+            });
             
-            // Сохраняем пользовательские настройки
+            loadFromFirebase('tabComments', (data) => {
+                if (data) tabComments = data;
+            });
+            
+            loadFromFirebase('categoriesData', (data) => {
+                if (data) categoriesData = data;
+                // Инициализация для новых вкладок
+                mainTabs.forEach(tab => {
+                    if (tab === 'о сайте' || tab === 'новости' || tab === 'розыгрыши') return;
+                    if (!categoriesData[tab]) {
+                        if (tab === 'софты') categoriesData[tab] = ['ddos', 'снос', 'докс', 'осинт'];
+                        else if (tab === 'мануалы') categoriesData[tab] = ['снос', 'анонимность', 'осинт'];
+                        else if (tab === 'полезные инструменты') categoriesData[tab] = ['парсинг', 'брут', 'сканеры'];
+                        else categoriesData[tab] = ['общая'];
+                    }
+                });
+            });
+            
+            loadFromFirebase('itemsData', (data) => {
+                if (data) itemsData = data;
+                // Инициализация для новых вкладок
+                mainTabs.forEach(tab => {
+                    if (!itemsData[tab]) itemsData[tab] = [];
+                });
+                if (!itemsData['розыгрыши']) itemsData['розыгрыши'] = [];
+                renderEverything();
+            });
+            
+            loadFromFirebase('news', (data) => {
+                if (data) news = data;
+                else news = [];
+            });
+            
+            loadFromFirebase('comments', (data) => {
+                if (data) comments = data;
+                else comments = {};
+            });
+            
+            loadFromFirebase('aboutText', (data) => {
+                if (data) aboutText = data;
+            });
+            
+            loadFromFirebase('aboutImage', (data) => {
+                if (data) aboutImage = data;
+            });
+            
+            loadFromFirebase('tgChannel', (data) => {
+                if (data) tgChannel = data;
+                updateTgLinks();
+            });
+            
+            loadFromFirebase('tgChat', (data) => {
+                if (data) tgChat = data;
+                updateTgLinks();
+            });
+        }
+
+        // ===== СОХРАНЕНИЕ В FIREBASE =====
+        function saveAll() {
+            saveToFirebase('mainTabs', mainTabs);
+            saveToFirebase('tabComments', tabComments);
+            saveToFirebase('categoriesData', categoriesData);
+            saveToFirebase('itemsData', itemsData);
+            saveToFirebase('news', news);
+            saveToFirebase('comments', comments);
+            saveToFirebase('aboutText', aboutText);
+            saveToFirebase('aboutImage', aboutImage);
+            saveToFirebase('tgChannel', tgChannel);
+            saveToFirebase('tgChat', tgChat);
+            
+            // Сохраняем пользовательские настройки локально
             localStorage.setItem('currentCats', JSON.stringify(currentCats));
             localStorage.setItem('currentPages', JSON.stringify(currentPages));
             localStorage.setItem('currentMainTab', currentMainTab);
             
-            updateTgLinks();
             renderEverything();
         }
+
+        // Загружаем данные при старте
+        loadAllFromFirebase();
+
+        // ===== ОСТАЛЬНЫЕ ФУНКЦИИ =====
+        function openModal(imageSrc) {
+            document.getElementById('modalImage').src = imageSrc;
+            document.getElementById('imageModal').classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('imageModal').classList.remove('active');
+        }
+
+        function formatMinutes(minutes) {
+            const num = parseInt(minutes) || 0;
+            if (num >= 11 && num <= 19) return num + ' минут';
+            const lastDigit = num % 10;
+            if (lastDigit === 1) return num + ' минута';
+            if (lastDigit >= 2 && lastDigit <= 4) return num + ' минуты';
+            return num + ' минут';
+        }
+
+        const ADMIN_PASS = 'ebalay';
 
         function updateTgLinks() {
             document.querySelectorAll('#footer-channel').forEach(el => el.href = tgChannel);
@@ -1187,6 +1268,46 @@
 
         function toggleSideMenu() {
             document.getElementById('sideMenu').classList.toggle('open');
+        }
+
+        // ===== ФУНКЦИЯ ДЛЯ КРАСИВОГО ВЫБОРА КАТЕГОРИЙ =====
+        function setupCategoryCheckboxes(containerId) {
+            setTimeout(() => {
+                const container = document.getElementById(containerId);
+                if (!container) return;
+                
+                const items = container.querySelectorAll('.checkbox-item');
+                items.forEach(item => {
+                    const checkbox = item.querySelector('input[type="checkbox"]');
+                    
+                    // Убираем старые обработчики
+                    item.replaceWith(item.cloneNode(true));
+                });
+                
+                // Добавляем новые обработчики
+                const newItems = container.querySelectorAll('.checkbox-item');
+                newItems.forEach(item => {
+                    const checkbox = item.querySelector('input[type="checkbox"]');
+                    
+                    // Если уже выбран - подсвечиваем
+                    if (checkbox && checkbox.checked) {
+                        item.classList.add('selected');
+                    }
+                    
+                    item.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const cb = this.querySelector('input[type="checkbox"]');
+                        if (cb) {
+                            cb.checked = !cb.checked;
+                            if (cb.checked) {
+                                this.classList.add('selected');
+                            } else {
+                                this.classList.remove('selected');
+                            }
+                        }
+                    });
+                });
+            }, 100);
         }
 
         // ===== КОММЕНТАРИИ =====
@@ -1550,6 +1671,13 @@
             
             tabsContainer.innerHTML = tabsHtml;
             contentsContainer.innerHTML = contentsHtml;
+            
+            // Настраиваем красивые чекбоксы для всех вкладок
+            mainTabs.forEach(tab => {
+                if (tab !== 'о сайте' && tab !== 'новости' && tab !== 'розыгрыши') {
+                    setupCategoryCheckboxes(`${tab}-categories-checkboxes`);
+                }
+            });
         }
 
         window.switchAdminTab = (tabId) => {
@@ -1564,6 +1692,11 @@
                 content.classList.remove('active');
             });
             document.getElementById(`admin-${tabId}-tab`).classList.add('active');
+            
+            // Настраиваем чекбоксы для текущей вкладки
+            if (tabId !== 'order' && tabId !== 'about' && tabId !== 'news' && tabId !== 'telegram' && tabId !== 'розыгрыши') {
+                setupCategoryCheckboxes(`${tabId}-categories-checkboxes`);
+            }
         };
 
         function getOrderAdminHtml() {
@@ -1660,13 +1793,14 @@
                 <div class="admin-list-item">${cat}<button class="admin-delete" onclick="deleteCategory('${tabName}', ${i})">✕</button></div>
             `).join('');
             
-            // Формируем чекбоксы для категорий - ЭТО ГЛАВНОЕ МЕСТО!
+            // Формируем чекбоксы для категорий
             let checkboxes = '';
             categories.forEach(cat => {
                 checkboxes += `
-                    <label class="checkbox-item">
-                        <input type="checkbox" value="${cat}"> ${cat}
-                    </label>
+                    <div class="checkbox-item">
+                        <input type="checkbox" value="${cat}">
+                        <span>${cat}</span>
+                    </div>
                 `;
             });
             
@@ -1725,7 +1859,7 @@
                         </div>
                         ` : ''}
                         
-                        <!-- КОНТЕЙНЕР С ЧЕКБОКСАМИ -->
+                        <!-- КОНТЕЙНЕР С КРАСИВЫМИ ЧЕКБОКСАМИ -->
                         <div class="checkbox-group" id="${tabName}-categories-checkboxes">
                             ${checkboxes}
                         </div>
@@ -1868,11 +2002,25 @@
                 item.categories = ['розыгрыши'];
                 
             } else {
-                // Для всех остальных вкладок - собираем выбранные категории
-                let checkboxes = document.querySelectorAll(`#${tabName}-categories-checkboxes input[type="checkbox"]:checked`);
-                console.log('Found checkboxes:', checkboxes.length);
+                // Для всех остальных вкладок - собираем выбранные категории через красивые чекбоксы
+                const container = document.getElementById(`${tabName}-categories-checkboxes`);
+                const selectedItems = container.querySelectorAll('.checkbox-item.selected');
+                const checkboxes = container.querySelectorAll('input[type="checkbox"]:checked');
                 
-                item.categories = Array.from(checkboxes).map(cb => cb.value);
+                console.log('Selected items:', selectedItems.length);
+                console.log('Checked checkboxes:', checkboxes.length);
+                
+                // Используем и то, и то для надежности
+                let categories = [];
+                if (checkboxes.length > 0) {
+                    categories = Array.from(checkboxes).map(cb => cb.value);
+                } else if (selectedItems.length > 0) {
+                    categories = Array.from(selectedItems).map(item => {
+                        return item.querySelector('span')?.textContent || item.querySelector('input')?.value;
+                    });
+                }
+                
+                item.categories = categories.filter(c => c);
                 console.log('Selected categories:', item.categories);
                 
                 if (item.categories.length === 0) {
@@ -1960,8 +2108,13 @@
                 
                 // Снимаем все чекбоксы
                 if (tabName !== 'розыгрыши') {
-                    let allCheckboxes = document.querySelectorAll(`#${tabName}-categories-checkboxes input[type="checkbox"]`);
-                    allCheckboxes.forEach(cb => cb.checked = false);
+                    const container = document.getElementById(`${tabName}-categories-checkboxes`);
+                    const items = container.querySelectorAll('.checkbox-item');
+                    items.forEach(item => {
+                        item.classList.remove('selected');
+                        const cb = item.querySelector('input[type="checkbox"]');
+                        if (cb) cb.checked = false;
+                    });
                 }
                 
                 // Очищаем превью
@@ -2030,3 +2183,4 @@
     </script>
 </body>
 </html>
+.
