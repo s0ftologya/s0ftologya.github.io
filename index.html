@@ -1061,6 +1061,7 @@
     </div>
 
     <script>
+        // Функции для модального окна
         function openModal(imageSrc) {
             document.getElementById('modalImage').src = imageSrc;
             document.getElementById('imageModal').classList.add('active');
@@ -1070,6 +1071,7 @@
             document.getElementById('imageModal').classList.remove('active');
         }
 
+        // Функция для форматирования минут
         function formatMinutes(minutes) {
             const num = parseInt(minutes) || 0;
             if (num >= 11 && num <= 19) return num + ' минут';
@@ -1079,16 +1081,14 @@
             return num + ' минут';
         }
 
+        // Пароль в открытом виде для надежности
         const ADMIN_PASS = 'ebalay';
 
+        // ===== ЗАГРУЗКА ДАННЫХ ИЗ LOCALSTORAGE =====
+        // Эти данные будут одинаковыми для всех пользователей, так как хранятся в localStorage сайта
         let mainTabs = JSON.parse(localStorage.getItem('mainTabs')) || ['о сайте', 'новости', 'софты', 'мануалы', 'розыгрыши', 'полезные инструменты'];
         
         let tabComments = JSON.parse(localStorage.getItem('tabComments')) || {};
-        mainTabs.forEach(tab => {
-            if (tab !== 'о сайте' && tab !== 'новости' && tabComments[tab] === undefined) {
-                tabComments[tab] = true;
-            }
-        });
         
         let categoriesData = JSON.parse(localStorage.getItem('categoriesData')) || {};
         let itemsData = JSON.parse(localStorage.getItem('itemsData')) || {};
@@ -1096,20 +1096,15 @@
         
         let comments = JSON.parse(localStorage.getItem('comments')) || {};
         
-        let userId = sessionStorage.getItem('commentUserId');
-        if (!userId) {
-            userId = 'user_' + Math.random().toString(36).substr(2, 9);
-            sessionStorage.setItem('commentUserId', userId);
-        }
-        
+        // Данные о сайте
         let aboutText = localStorage.getItem('aboutText') || 'проект про софты для пробива, мануалы, закрытые розыгрыши. без цензуры, без воды.';
         let aboutImage = localStorage.getItem('aboutImage') || '';
         
+        // Telegram ссылки
         let tgChannel = localStorage.getItem('tgChannel') || '#';
         let tgChat = localStorage.getItem('tgChat') || '#';
 
-        let currentMainTab = localStorage.getItem('currentMainTab') || mainTabs[0];
-        
+        // ===== ИНИЦИАЛИЗАЦИЯ =====
         mainTabs.forEach(tab => {
             if (tab === 'о сайте' || tab === 'новости' || tab === 'розыгрыши') return;
             if (!categoriesData[tab]) {
@@ -1121,10 +1116,12 @@
             if (!itemsData[tab]) itemsData[tab] = [];
         });
 
+        // Для розыгрышей
         if (!itemsData['розыгрыши']) {
             itemsData['розыгрыши'] = [];
         }
 
+        // Текущие выбранные категории (только для текущего пользователя)
         let currentCats = JSON.parse(localStorage.getItem('currentCats')) || {};
         mainTabs.forEach(tab => {
             if (tab !== 'о сайте' && tab !== 'новости' && tab !== 'розыгрыши' && !currentCats[tab]) {
@@ -1132,23 +1129,39 @@
             }
         });
 
+        // Текущие страницы пагинации (только для текущего пользователя)
         let currentPages = JSON.parse(localStorage.getItem('currentPages')) || {};
         const ITEMS_PER_PAGE = 10;
 
+        // ID пользователя для комментариев
+        let userId = sessionStorage.getItem('commentUserId');
+        if (!userId) {
+            userId = 'user_' + Math.random().toString(36).substr(2, 9);
+            sessionStorage.setItem('commentUserId', userId);
+        }
+
+        // Текущая выбранная вкладка (только для текущего пользователя)
+        let currentMainTab = localStorage.getItem('currentMainTab') || mainTabs[0];
+
+        // ===== СОХРАНЕНИЕ =====
         function saveAll() {
+            // Сохраняем данные, которые должны быть видны всем
             localStorage.setItem('mainTabs', JSON.stringify(mainTabs));
             localStorage.setItem('tabComments', JSON.stringify(tabComments));
             localStorage.setItem('categoriesData', JSON.stringify(categoriesData));
             localStorage.setItem('itemsData', JSON.stringify(itemsData));
             localStorage.setItem('news', JSON.stringify(news));
             localStorage.setItem('comments', JSON.stringify(comments));
-            localStorage.setItem('currentCats', JSON.stringify(currentCats));
-            localStorage.setItem('currentPages', JSON.stringify(currentPages));
             localStorage.setItem('aboutText', aboutText);
             localStorage.setItem('aboutImage', aboutImage);
             localStorage.setItem('tgChannel', tgChannel);
             localStorage.setItem('tgChat', tgChat);
+            
+            // Сохраняем пользовательские настройки
+            localStorage.setItem('currentCats', JSON.stringify(currentCats));
+            localStorage.setItem('currentPages', JSON.stringify(currentPages));
             localStorage.setItem('currentMainTab', currentMainTab);
+            
             updateTgLinks();
             renderEverything();
         }
@@ -1176,6 +1189,7 @@
             document.getElementById('sideMenu').classList.toggle('open');
         }
 
+        // ===== КОММЕНТАРИИ =====
         function addComment(tabName, itemId, text) {
             if (!text.trim()) return;
             let key = `${tabName}_${itemId}`;
@@ -1243,6 +1257,7 @@
             return html;
         }
 
+        // ===== УПРАВЛЕНИЕ ВКЛАДКАМИ =====
         window.moveTab = (index, direction) => {
             let newIndex = index + direction;
             if (newIndex >= 0 && newIndex < mainTabs.length) {
@@ -1313,6 +1328,7 @@
             }
         };
 
+        // ===== ОТОБРАЖЕНИЕ =====
         function renderMainTabs() {
             let sideHtml = '';
             mainTabs.forEach((tab, i) => {
@@ -1506,6 +1522,7 @@
             renderPage(currentMainTab);
         }
 
+        // ===== АДМИН ПАНЕЛЬ =====
         function renderAdminPanel() {
             let tabsContainer = document.getElementById('admin-tabs-container');
             let contentsContainer = document.getElementById('admin-tab-contents');
@@ -1643,9 +1660,15 @@
                 <div class="admin-list-item">${cat}<button class="admin-delete" onclick="deleteCategory('${tabName}', ${i})">✕</button></div>
             `).join('');
             
-            let checkboxes = categories.map(cat => 
-                `<label class="checkbox-item"><input type="checkbox" value="${cat}"> ${cat}</label>`
-            ).join('');
+            // Формируем чекбоксы для категорий - ЭТО ГЛАВНОЕ МЕСТО!
+            let checkboxes = '';
+            categories.forEach(cat => {
+                checkboxes += `
+                    <label class="checkbox-item">
+                        <input type="checkbox" value="${cat}"> ${cat}
+                    </label>
+                `;
+            });
             
             let formFields = '';
             if (tabName === 'мануалы') {
@@ -1701,7 +1724,12 @@
                             <div id="${tabName}-file-name" style="color:#9aafc9; margin-top:5px;"></div>
                         </div>
                         ` : ''}
-                        <div class="checkbox-group" id="${tabName}-categories-checkboxes">${checkboxes}</div>
+                        
+                        <!-- КОНТЕЙНЕР С ЧЕКБОКСАМИ -->
+                        <div class="checkbox-group" id="${tabName}-categories-checkboxes">
+                            ${checkboxes}
+                        </div>
+                        
                         <button onclick="addItem('${tabName}')">➕ добавить</button>
                     </div>
                     ${itemsHtml}
@@ -1721,6 +1749,7 @@
             `;
         }
 
+        // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
         window.toggleComments = (tabName) => {
             tabComments[tabName] = document.getElementById(`comments-${tabName}`).checked;
             saveAll();
@@ -1753,7 +1782,9 @@
                     saveAll();
                 };
                 reader.readAsDataURL(file.files[0]);
-            } else saveAll();
+            } else {
+                saveAll();
+            }
         };
 
         window.addNews = function() {
@@ -1806,6 +1837,7 @@
             renderAdminPanel();
         };
 
+        // ===== ОСНОВНАЯ ФУНКЦИЯ ДОБАВЛЕНИЯ ЭЛЕМЕНТОВ =====
         window.addItem = (tabName) => {
             console.log('Adding item to', tabName);
             
@@ -1818,6 +1850,7 @@
             let item = { name };
             let hasFile = false;
             
+            // Сбор данных в зависимости от типа вкладки
             if (tabName === 'розыгрыши') {
                 let prizes = document.getElementById(`${tabName}-prizes`)?.value?.trim();
                 let detail = document.getElementById(`${tabName}-detail`)?.value?.trim();
@@ -1834,87 +1867,80 @@
                 item.detail = detail;
                 item.categories = ['розыгрыши'];
                 
-            } else if (tabName === 'мануалы') {
-                let minutes = document.getElementById(`${tabName}-minutes`)?.value;
-                let text = document.getElementById(`${tabName}-text`)?.value?.trim();
-                
-                let fileInput = document.getElementById(`${tabName}-file`);
-                if (fileInput?.files && fileInput.files[0]) {
-                    hasFile = true;
-                } else if (!text) {
-                    alert('Введите текст мануала или загрузите файл');
-                    return;
-                }
-                
-                item.minutes = minutes || '0';
-                if (text) item.text = text;
-                
-                let checkboxes = document.querySelectorAll(`#${tabName}-categories-checkboxes input[type="checkbox"]:checked`);
-                item.categories = Array.from(checkboxes).map(cb => cb.value);
-                
-                if (item.categories.length === 0) {
-                    alert('Выберите хотя бы одну категорию');
-                    return;
-                }
-                
-            } else if (tabName === 'полезные инструменты') {
-                let desc = document.getElementById(`${tabName}-desc`)?.value?.trim();
-                let link = document.getElementById(`${tabName}-link`)?.value?.trim();
-                
-                let fileInput = document.getElementById(`${tabName}-file`);
-                if (fileInput?.files && fileInput.files[0]) {
-                    hasFile = true;
-                } else if (!desc || !link) {
-                    alert('Введите описание и ссылку или загрузите файл');
-                    return;
-                }
-                
-                if (desc) item.description = desc;
-                if (link) item.link = link;
-                
-                let checkboxes = document.querySelectorAll(`#${tabName}-categories-checkboxes input[type="checkbox"]:checked`);
-                item.categories = Array.from(checkboxes).map(cb => cb.value);
-                
-                if (item.categories.length === 0) {
-                    alert('Выберите хотя бы одну категорию');
-                    return;
-                }
-                
             } else {
-                let size = document.getElementById(`${tabName}-size`)?.value?.trim();
-                let desc = document.getElementById(`${tabName}-desc`)?.value?.trim();
-                let link = document.getElementById(`${tabName}-link`)?.value?.trim();
-                
-                if (!size) {
-                    alert('Введите размер');
-                    return;
-                }
-                if (!desc) {
-                    alert('Введите описание');
-                    return;
-                }
-                if (!link) {
-                    alert('Введите ссылку');
-                    return;
-                }
-                item.size = size;
-                item.description = desc;
-                item.link = link;
-                
+                // Для всех остальных вкладок - собираем выбранные категории
                 let checkboxes = document.querySelectorAll(`#${tabName}-categories-checkboxes input[type="checkbox"]:checked`);
+                console.log('Found checkboxes:', checkboxes.length);
+                
                 item.categories = Array.from(checkboxes).map(cb => cb.value);
+                console.log('Selected categories:', item.categories);
                 
                 if (item.categories.length === 0) {
                     alert('Выберите хотя бы одну категорию');
                     return;
+                }
+                
+                if (tabName === 'мануалы') {
+                    let minutes = document.getElementById(`${tabName}-minutes`)?.value;
+                    let text = document.getElementById(`${tabName}-text`)?.value?.trim();
+                    
+                    let fileInput = document.getElementById(`${tabName}-file`);
+                    if (fileInput?.files && fileInput.files[0]) {
+                        hasFile = true;
+                    } else if (!text) {
+                        alert('Введите текст мануала или загрузите файл');
+                        return;
+                    }
+                    
+                    item.minutes = minutes || '0';
+                    if (text) item.text = text;
+                    
+                } else if (tabName === 'полезные инструменты') {
+                    let desc = document.getElementById(`${tabName}-desc`)?.value?.trim();
+                    let link = document.getElementById(`${tabName}-link`)?.value?.trim();
+                    
+                    let fileInput = document.getElementById(`${tabName}-file`);
+                    if (fileInput?.files && fileInput.files[0]) {
+                        hasFile = true;
+                    } else if (!desc || !link) {
+                        alert('Введите описание и ссылку или загрузите файл');
+                        return;
+                    }
+                    
+                    if (desc) item.description = desc;
+                    if (link) item.link = link;
+                    
+                } else {
+                    // Софты и другие
+                    let size = document.getElementById(`${tabName}-size`)?.value?.trim();
+                    let desc = document.getElementById(`${tabName}-desc`)?.value?.trim();
+                    let link = document.getElementById(`${tabName}-link`)?.value?.trim();
+                    
+                    if (!size) {
+                        alert('Введите размер');
+                        return;
+                    }
+                    if (!desc) {
+                        alert('Введите описание');
+                        return;
+                    }
+                    if (!link) {
+                        alert('Введите ссылку');
+                        return;
+                    }
+                    item.size = size;
+                    item.description = desc;
+                    item.link = link;
                 }
             }
             
+            // Функция завершения добавления
             function finalizeItem() {
                 itemsData[tabName].push(item);
                 saveAll();
                 renderAdminPanel();
                 
+                // Очистка полей
                 document.getElementById(`${tabName}-name`).value = '';
                 
                 if (tabName === 'розыгрыши') {
@@ -1932,11 +1958,13 @@
                     document.getElementById(`${tabName}-link`).value = '';
                 }
                 
+                // Снимаем все чекбоксы
                 if (tabName !== 'розыгрыши') {
                     let allCheckboxes = document.querySelectorAll(`#${tabName}-categories-checkboxes input[type="checkbox"]`);
                     allCheckboxes.forEach(cb => cb.checked = false);
                 }
                 
+                // Очищаем превью
                 let preview = document.getElementById(`${tabName}-preview`);
                 if (preview) {
                     preview.style.backgroundImage = '';
@@ -1948,6 +1976,7 @@
                 }
             }
             
+            // Обработка изображения
             let imageFile = document.getElementById(`${tabName}-image-file`);
             if (imageFile?.files && imageFile.files[0]) {
                 let reader = new FileReader();
@@ -1995,6 +2024,7 @@
         window.addComment = addComment;
         window.deleteComment = deleteComment;
 
+        // Запуск
         renderEverything();
         updateTgLinks();
     </script>
