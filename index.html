@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>s0fтология · FIREBASE</title>
+    <title>s0fтология · FIREBASE FIX</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -1107,18 +1107,19 @@
 
         function loadFromFirebase(path, callback) {
             database.ref(path).on('value', (snapshot) => {
-                callback(snapshot.val());
+                const data = snapshot.val();
+                callback(data);
             });
         }
 
         // ===== ДАННЫЕ =====
-        let mainTabs = ['о сайте', 'новости', 'софты', 'мануалы', 'розыгрыши', 'полезные инструменты'];
+        let mainTabs = [];
         let tabComments = {};
         let categoriesData = {};
         let itemsData = {};
         let news = [];
         let comments = {};
-        let aboutText = 'проект про софты для пробива, мануалы, закрытые розыгрыши. без цензуры, без воды.';
+        let aboutText = '';
         let aboutImage = '';
         let tgChannel = '#';
         let tgChat = '#';
@@ -1136,22 +1137,24 @@
         }
 
         // Текущая выбранная вкладка
-        let currentMainTab = localStorage.getItem('currentMainTab') || mainTabs[0];
+        let currentMainTab = 'о сайте';
 
         // ===== ЗАГРУЗКА ДАННЫХ ИЗ FIREBASE =====
         function loadAllFromFirebase() {
             loadFromFirebase('mainTabs', (data) => {
-                if (data) mainTabs = data;
+                mainTabs = data || ['о сайте', 'новости', 'софты', 'мануалы', 'розыгрыши', 'полезные инструменты'];
+                if (!currentMainTab || !mainTabs.includes(currentMainTab)) {
+                    currentMainTab = mainTabs[0];
+                }
                 renderEverything();
             });
             
             loadFromFirebase('tabComments', (data) => {
-                if (data) tabComments = data;
+                tabComments = data || {};
             });
             
             loadFromFirebase('categoriesData', (data) => {
-                if (data) categoriesData = data;
-                // Инициализация для новых вкладок
+                categoriesData = data || {};
                 mainTabs.forEach(tab => {
                     if (tab === 'о сайте' || tab === 'новости' || tab === 'розыгрыши') return;
                     if (!categoriesData[tab]) {
@@ -1164,8 +1167,7 @@
             });
             
             loadFromFirebase('itemsData', (data) => {
-                if (data) itemsData = data;
-                // Инициализация для новых вкладок
+                itemsData = data || {};
                 mainTabs.forEach(tab => {
                     if (!itemsData[tab]) itemsData[tab] = [];
                 });
@@ -1174,30 +1176,28 @@
             });
             
             loadFromFirebase('news', (data) => {
-                if (data) news = data;
-                else news = [];
+                news = data || [];
             });
             
             loadFromFirebase('comments', (data) => {
-                if (data) comments = data;
-                else comments = {};
+                comments = data || {};
             });
             
             loadFromFirebase('aboutText', (data) => {
-                if (data) aboutText = data;
+                aboutText = data || 'проект про софты для пробива, мануалы, закрытые розыгрыши. без цензуры, без воды.';
             });
             
             loadFromFirebase('aboutImage', (data) => {
-                if (data) aboutImage = data;
+                aboutImage = data || '';
             });
             
             loadFromFirebase('tgChannel', (data) => {
-                if (data) tgChannel = data;
+                tgChannel = data || '#';
                 updateTgLinks();
             });
             
             loadFromFirebase('tgChat', (data) => {
-                if (data) tgChat = data;
+                tgChat = data || '#';
                 updateTgLinks();
             });
         }
@@ -1215,12 +1215,9 @@
             saveToFirebase('tgChannel', tgChannel);
             saveToFirebase('tgChat', tgChat);
             
-            // Сохраняем пользовательские настройки локально
             localStorage.setItem('currentCats', JSON.stringify(currentCats));
             localStorage.setItem('currentPages', JSON.stringify(currentPages));
             localStorage.setItem('currentMainTab', currentMainTab);
-            
-            renderEverything();
         }
 
         // Загружаем данные при старте
@@ -1270,7 +1267,6 @@
             document.getElementById('sideMenu').classList.toggle('open');
         }
 
-        // ===== ФУНКЦИЯ ДЛЯ КРАСИВОГО ВЫБОРА КАТЕГОРИЙ =====
         function setupCategoryCheckboxes(containerId) {
             setTimeout(() => {
                 const container = document.getElementById(containerId);
@@ -1280,16 +1276,13 @@
                 items.forEach(item => {
                     const checkbox = item.querySelector('input[type="checkbox"]');
                     
-                    // Убираем старые обработчики
                     item.replaceWith(item.cloneNode(true));
                 });
                 
-                // Добавляем новые обработчики
                 const newItems = container.querySelectorAll('.checkbox-item');
                 newItems.forEach(item => {
                     const checkbox = item.querySelector('input[type="checkbox"]');
                     
-                    // Если уже выбран - подсвечиваем
                     if (checkbox && checkbox.checked) {
                         item.classList.add('selected');
                     }
@@ -1310,7 +1303,6 @@
             }, 100);
         }
 
-        // ===== КОММЕНТАРИИ =====
         function addComment(tabName, itemId, text) {
             if (!text.trim()) return;
             let key = `${tabName}_${itemId}`;
@@ -1378,7 +1370,6 @@
             return html;
         }
 
-        // ===== УПРАВЛЕНИЕ ВКЛАДКАМИ =====
         window.moveTab = (index, direction) => {
             let newIndex = index + direction;
             if (newIndex >= 0 && newIndex < mainTabs.length) {
@@ -1449,10 +1440,9 @@
             }
         };
 
-        // ===== ОТОБРАЖЕНИЕ =====
         function renderMainTabs() {
             let sideHtml = '';
-            mainTabs.forEach((tab, i) => {
+            mainTabs.forEach((tab) => {
                 sideHtml += `<button class="side-menu-item ${tab === currentMainTab ? 'active' : ''}" onclick="switchMainTab('${tab}'); toggleSideMenu();">${tab}</button>`;
             });
             document.getElementById('sideMenuItems').innerHTML = sideHtml;
@@ -1460,7 +1450,7 @@
 
         window.switchMainTab = (tabName) => {
             currentMainTab = tabName;
-            saveAll();
+            localStorage.setItem('currentMainTab', currentMainTab);
             renderPage(tabName);
         };
 
@@ -1559,7 +1549,7 @@
         window.setCategory = (tabName, cat) => {
             currentCats[tabName] = cat;
             currentPages[tabName] = 1;
-            saveAll();
+            localStorage.setItem('currentCats', JSON.stringify(currentCats));
             renderItems(tabName);
         };
 
@@ -1643,7 +1633,6 @@
             renderPage(currentMainTab);
         }
 
-        // ===== АДМИН ПАНЕЛЬ =====
         function renderAdminPanel() {
             let tabsContainer = document.getElementById('admin-tabs-container');
             let contentsContainer = document.getElementById('admin-tab-contents');
@@ -1672,7 +1661,6 @@
             tabsContainer.innerHTML = tabsHtml;
             contentsContainer.innerHTML = contentsHtml;
             
-            // Настраиваем красивые чекбоксы для всех вкладок
             mainTabs.forEach(tab => {
                 if (tab !== 'о сайте' && tab !== 'новости' && tab !== 'розыгрыши') {
                     setupCategoryCheckboxes(`${tab}-categories-checkboxes`);
@@ -1693,7 +1681,6 @@
             });
             document.getElementById(`admin-${tabId}-tab`).classList.add('active');
             
-            // Настраиваем чекбоксы для текущей вкладки
             if (tabId !== 'order' && tabId !== 'about' && tabId !== 'news' && tabId !== 'telegram' && tabId !== 'розыгрыши') {
                 setupCategoryCheckboxes(`${tabId}-categories-checkboxes`);
             }
@@ -1793,7 +1780,6 @@
                 <div class="admin-list-item">${cat}<button class="admin-delete" onclick="deleteCategory('${tabName}', ${i})">✕</button></div>
             `).join('');
             
-            // Формируем чекбоксы для категорий
             let checkboxes = '';
             categories.forEach(cat => {
                 checkboxes += `
@@ -1859,7 +1845,6 @@
                         </div>
                         ` : ''}
                         
-                        <!-- КОНТЕЙНЕР С КРАСИВЫМИ ЧЕКБОКСАМИ -->
                         <div class="checkbox-group" id="${tabName}-categories-checkboxes">
                             ${checkboxes}
                         </div>
@@ -1883,7 +1868,6 @@
             `;
         }
 
-        // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
         window.toggleComments = (tabName) => {
             tabComments[tabName] = document.getElementById(`comments-${tabName}`).checked;
             saveAll();
@@ -1971,7 +1955,6 @@
             renderAdminPanel();
         };
 
-        // ===== ОСНОВНАЯ ФУНКЦИЯ ДОБАВЛЕНИЯ ЭЛЕМЕНТОВ =====
         window.addItem = (tabName) => {
             console.log('Adding item to', tabName);
             
@@ -1984,7 +1967,6 @@
             let item = { name };
             let hasFile = false;
             
-            // Сбор данных в зависимости от типа вкладки
             if (tabName === 'розыгрыши') {
                 let prizes = document.getElementById(`${tabName}-prizes`)?.value?.trim();
                 let detail = document.getElementById(`${tabName}-detail`)?.value?.trim();
@@ -2002,15 +1984,10 @@
                 item.categories = ['розыгрыши'];
                 
             } else {
-                // Для всех остальных вкладок - собираем выбранные категории через красивые чекбоксы
                 const container = document.getElementById(`${tabName}-categories-checkboxes`);
                 const selectedItems = container.querySelectorAll('.checkbox-item.selected');
                 const checkboxes = container.querySelectorAll('input[type="checkbox"]:checked');
                 
-                console.log('Selected items:', selectedItems.length);
-                console.log('Checked checkboxes:', checkboxes.length);
-                
-                // Используем и то, и то для надежности
                 let categories = [];
                 if (checkboxes.length > 0) {
                     categories = Array.from(checkboxes).map(cb => cb.value);
@@ -2021,7 +1998,6 @@
                 }
                 
                 item.categories = categories.filter(c => c);
-                console.log('Selected categories:', item.categories);
                 
                 if (item.categories.length === 0) {
                     alert('Выберите хотя бы одну категорию');
@@ -2059,7 +2035,6 @@
                     if (link) item.link = link;
                     
                 } else {
-                    // Софты и другие
                     let size = document.getElementById(`${tabName}-size`)?.value?.trim();
                     let desc = document.getElementById(`${tabName}-desc`)?.value?.trim();
                     let link = document.getElementById(`${tabName}-link`)?.value?.trim();
@@ -2082,13 +2057,11 @@
                 }
             }
             
-            // Функция завершения добавления
             function finalizeItem() {
                 itemsData[tabName].push(item);
                 saveAll();
                 renderAdminPanel();
                 
-                // Очистка полей
                 document.getElementById(`${tabName}-name`).value = '';
                 
                 if (tabName === 'розыгрыши') {
@@ -2106,7 +2079,6 @@
                     document.getElementById(`${tabName}-link`).value = '';
                 }
                 
-                // Снимаем все чекбоксы
                 if (tabName !== 'розыгрыши') {
                     const container = document.getElementById(`${tabName}-categories-checkboxes`);
                     const items = container.querySelectorAll('.checkbox-item');
@@ -2117,7 +2089,6 @@
                     });
                 }
                 
-                // Очищаем превью
                 let preview = document.getElementById(`${tabName}-preview`);
                 if (preview) {
                     preview.style.backgroundImage = '';
@@ -2129,7 +2100,6 @@
                 }
             }
             
-            // Обработка изображения
             let imageFile = document.getElementById(`${tabName}-image-file`);
             if (imageFile?.files && imageFile.files[0]) {
                 let reader = new FileReader();
@@ -2177,7 +2147,6 @@
         window.addComment = addComment;
         window.deleteComment = deleteComment;
 
-        // Запуск
         renderEverything();
         updateTgLinks();
     </script>
