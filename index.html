@@ -203,6 +203,12 @@
             border: 2px solid #B22222;
             margin-bottom: 20px;
             box-shadow: 0 0 30px rgba(139, 0, 0, 0.3);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .about-image:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
         }
         .about-image img {
             width: 100%;
@@ -250,6 +256,7 @@
             height: 180px;
             background: #1f3145;
             border-bottom: 2px solid #B22222;
+            cursor: pointer;
         }
         .news-image img {
             width: 100%;
@@ -365,6 +372,7 @@
             margin-bottom: 10px;
             overflow: hidden;
             border: 1px solid #5a6f8a;
+            cursor: pointer;
         }
         .card-image img {
             width: 100%;
@@ -412,6 +420,12 @@
             overflow: hidden;
             border: 2px solid #B22222;
             box-shadow: 0 0 30px rgba(139, 0, 0, 0.5);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .detail-image:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
         }
         .detail-image img { width: 100%; height: 100%; object-fit: cover; }
         .detail-title { font-size: 2.2rem; color: #DC143C; margin-bottom: 12px; }
@@ -424,6 +438,19 @@
             margin: 16px 0;
             white-space: pre-line;
             border: 1px solid #B22222;
+        }
+        .file-content {
+            color: #d0e4ff;
+            font-size: 0.95rem;
+            background: #0a1a28;
+            padding: 18px;
+            border-radius: 16px;
+            margin: 16px 0;
+            white-space: pre-wrap;
+            border: 1px solid #B22222;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
         }
         .action-btn {
             background: linear-gradient(135deg, #8B0000, #B22222);
@@ -462,6 +489,31 @@
         }
         .back-btn:active {
             transform: scale(0.97);
+        }
+
+        /* Модальное окно для изображений */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .modal img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border: 2px solid #B22222;
+            border-radius: 16px;
         }
 
         .comments-section {
@@ -790,13 +842,14 @@
             display: flex; align-items: center; gap: 5px; color: #b0c4de;
             font-size: 0.9rem;
         }
-        .image-upload {
+        .image-upload, .file-upload {
             background: rgba(0, 0, 0, 0.3);
             border-radius: 16px;
             padding: 10px;
             border: 1px dashed #B22222;
+            margin-bottom: 8px;
         }
-        .image-upload input[type="file"] {
+        .image-upload input[type="file"], .file-upload input[type="file"] {
             background: transparent;
             border: none;
             color: transparent;
@@ -804,7 +857,7 @@
             width: 100%;
             font-size: 0.8rem;
         }
-        .image-upload input[type="file"]::file-selector-button {
+        .image-upload input[type="file"]::file-selector-button, .file-upload input[type="file"]::file-selector-button {
             background: rgba(139, 0, 0, 0.3);
             border: 1px solid #B22222;
             color: white;
@@ -813,10 +866,10 @@
             cursor: pointer;
             transition: 0.2s;
         }
-        .image-upload input[type="file"]::file-selector-button:hover {
+        .image-upload input[type="file"]::file-selector-button:hover, .file-upload input[type="file"]::file-selector-button:hover {
             background: #8B0000;
         }
-        .image-upload input[type="file"]::file-selector-button:active {
+        .image-upload input[type="file"]::file-selector-button:active, .file-upload input[type="file"]::file-selector-button:active {
             transform: scale(0.96);
         }
         .preview-image {
@@ -878,6 +931,11 @@
     </style>
 </head>
 <body>
+    <!-- Модальное окно для изображений -->
+    <div class="modal" id="imageModal" onclick="closeModal()">
+        <img id="modalImage" src="" alt="">
+    </div>
+
     <div class="side-menu" id="sideMenu">
         <button class="side-menu-close" onclick="toggleSideMenu()">✕</button>
         <div id="sideMenuItems"></div>
@@ -913,6 +971,26 @@
     </div>
 
     <script>
+        // Функции для модального окна
+        function openModal(imageSrc) {
+            document.getElementById('modalImage').src = imageSrc;
+            document.getElementById('imageModal').classList.add('active');
+        }
+        
+        function closeModal() {
+            document.getElementById('imageModal').classList.remove('active');
+        }
+
+        // Функция для форматирования минут
+        function formatMinutes(minutes) {
+            const num = parseInt(minutes) || 0;
+            if (num >= 11 && num <= 19) return num + ' минут';
+            const lastDigit = num % 10;
+            if (lastDigit === 1) return num + ' минута';
+            if (lastDigit >= 2 && lastDigit <= 4) return num + ' минуты';
+            return num + ' минут';
+        }
+
         // Пароль в открытом виде для надежности
         const ADMIN_PASS = 'ebalay';
 
@@ -1162,7 +1240,7 @@
             let container = document.getElementById('pages-container');
             
             if (tabName === 'о сайте') {
-                let imageHtml = aboutImage ? `<div class="about-image"><img src="${aboutImage}"></div>` : '';
+                let imageHtml = aboutImage ? `<div class="about-image" onclick="openModal('${aboutImage}')"><img src="${aboutImage}"></div>` : '';
                 container.innerHTML = `
                     <div class="about-section">
                         ${imageHtml}
@@ -1183,7 +1261,7 @@
                 news.slice().reverse().forEach(item => {
                     newsHtml += `
                         <div class="news-card">
-                            ${item.image ? `<div class="news-image"><img src="${item.image}"></div>` : ''}
+                            ${item.image ? `<div class="news-image" onclick="openModal('${item.image}')"><img src="${item.image}"></div>` : ''}
                             <div class="news-content">
                                 <div class="news-date">${item.date || new Date().toLocaleDateString()}</div>
                                 <div class="news-title">${item.title}</div>
@@ -1244,9 +1322,9 @@
             page.forEach(item => {
                 let index = items.indexOf(item);
                 grid += `<div class="card-item" onclick="showItemDetail('${tabName}', ${index})">
-                    ${item.image ? `<div class="card-image"><img src="${item.image}"></div>` : ''}
+                    ${item.image ? `<div class="card-image" onclick="event.stopPropagation(); openModal('${item.image}')"><img src="${item.image}"></div>` : ''}
                     <div class="card-name">${item.name || ''}</div>
-                    <div class="card-meta">${item.size || item.minutes || ''}</div>
+                    <div class="card-meta">${item.size || (item.minutes ? formatMinutes(item.minutes) : '')}</div>
                     <div class="card-tags">${(item.categories || []).map(c => `<span class="tag">${c}</span>`).join('')}</div>
                 </div>`;
             });
@@ -1269,10 +1347,15 @@
             let detailHtml = `
                 <div class="detail-panel">
                     <button class="back-btn" onclick="closeItemDetail('${tabName}')">← назад</button>
-                    ${item.image ? `<div class="detail-image"><img src="${item.image}"></div>` : ''}
+                    ${item.image ? `<div class="detail-image" onclick="openModal('${item.image}')"><img src="${item.image}"></div>` : ''}
                     <div class="detail-title">${item.name}</div>
-                    <div class="detail-content">${item.description || item.text || item.detail || ''}</div>
             `;
+            
+            if (item.fileContent) {
+                detailHtml += `<div class="file-content">${item.fileContent}</div>`;
+            } else {
+                detailHtml += `<div class="detail-content">${item.description || item.text || item.detail || ''}</div>`;
+            }
             
             if (item.link) {
                 detailHtml += `<a href="${item.link}" class="action-btn" target="_blank">${tabName === 'софты' ? 'установить' : 'скачать'}</a>`;
@@ -1421,7 +1504,7 @@
             let formFields = '';
             if (tabName === 'мануалы') {
                 formFields = `
-                    <input type="number" id="${tabName}-minutes" placeholder="минут на чтение">
+                    <input type="number" id="${tabName}-minutes" placeholder="минут на чтение (только число)">
                     <textarea id="${tabName}-text" placeholder="текст мануала" rows="3"></textarea>
                 `;
             } else if (tabName === 'розыгрыши') {
@@ -1471,6 +1554,10 @@
                             <input type="file" id="${tabName}-image-file" accept="image/*" onchange="previewImage(this, '${tabName}-preview')">
                             <div id="${tabName}-preview" class="preview-image"></div>
                         </div>
+                        <div class="file-upload">
+                            <input type="file" id="${tabName}-file" accept=".txt" onchange="previewTextFile(this, '${tabName}')">
+                            <div id="${tabName}-file-name" style="color:#9aafc9; margin-top:5px;"></div>
+                        </div>
                         <div class="checkbox-group" id="${tabName}-categories-checkboxes">${checkboxes}</div>
                         <button onclick="addItem('${tabName}')">➕ добавить</button>
                     </div>
@@ -1503,6 +1590,13 @@
                     document.getElementById(previewId).style.backgroundImage = `url(${e.target.result})`;
                 };
                 reader.readAsDataURL(input.files[0]);
+            }
+        };
+
+        window.previewTextFile = function(input, tabName) {
+            if (input.files && input.files[0]) {
+                let fileName = input.files[0].name;
+                document.getElementById(`${tabName}-file-name`).textContent = `выбран файл: ${fileName}`;
             }
         };
 
@@ -1579,17 +1673,24 @@
             }
             
             let item = { name };
+            let hasFile = false;
             
             if (tabName === 'мануалы') {
                 let minutes = document.getElementById(`${tabName}-minutes`)?.value;
                 let text = document.getElementById(`${tabName}-text`)?.value?.trim();
                 
-                if (!text) {
-                    alert('Введите текст мануала');
+                // Проверяем, есть ли файл
+                let fileInput = document.getElementById(`${tabName}-file`);
+                if (fileInput?.files && fileInput.files[0]) {
+                    hasFile = true;
+                    // Файл будет обработан позже
+                } else if (!text) {
+                    alert('Введите текст мануала или загрузите файл');
                     return;
                 }
+                
                 item.minutes = minutes || '0';
-                item.text = text;
+                if (text) item.text = text;
                 
             } else if (tabName === 'розыгрыши') {
                 let prizes = document.getElementById(`${tabName}-prizes`)?.value?.trim();
@@ -1610,16 +1711,17 @@
                 let desc = document.getElementById(`${tabName}-desc`)?.value?.trim();
                 let link = document.getElementById(`${tabName}-link`)?.value?.trim();
                 
-                if (!desc) {
-                    alert('Введите описание');
+                // Проверяем, есть ли файл
+                let fileInput = document.getElementById(`${tabName}-file`);
+                if (fileInput?.files && fileInput.files[0]) {
+                    hasFile = true;
+                } else if (!desc || !link) {
+                    alert('Введите описание и ссылку или загрузите файл');
                     return;
                 }
-                if (!link) {
-                    alert('Введите ссылку');
-                    return;
-                }
-                item.description = desc;
-                item.link = link;
+                
+                if (desc) item.description = desc;
+                if (link) item.link = link;
                 
             } else {
                 let size = document.getElementById(`${tabName}-size`)?.value?.trim();
@@ -1680,47 +1782,79 @@
                 }
             }
             
-            let file = document.getElementById(`${tabName}-image-file`);
-            if (file?.files && file.files[0]) {
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    item.image = e.target.result;
-                    itemsData[tabName].push(item);
-                    saveAll();
-                    renderAdminPanel();
-                };
-                reader.readAsDataURL(file.files[0]);
-            } else {
+            // Обработка файлов
+            let imageFile = document.getElementById(`${tabName}-image-file`);
+            let textFile = document.getElementById(`${tabName}-file`);
+            
+            // Функция для завершения добавления
+            function finalizeItem() {
                 itemsData[tabName].push(item);
                 saveAll();
                 renderAdminPanel();
+                
+                // Очистка полей
+                document.getElementById(`${tabName}-name`).value = '';
+                
+                if (tabName === 'мануалы') {
+                    document.getElementById(`${tabName}-minutes`).value = '';
+                    document.getElementById(`${tabName}-text`).value = '';
+                } else if (tabName === 'розыгрыши') {
+                    document.getElementById(`${tabName}-prizes`).value = '';
+                    document.getElementById(`${tabName}-detail`).value = '';
+                } else if (tabName === 'полезные инструменты') {
+                    document.getElementById(`${tabName}-desc`).value = '';
+                    document.getElementById(`${tabName}-link`).value = '';
+                } else {
+                    document.getElementById(`${tabName}-size`).value = '';
+                    document.getElementById(`${tabName}-desc`).value = '';
+                    document.getElementById(`${tabName}-link`).value = '';
+                }
+                
+                // Снимаем все чекбоксы
+                let allCheckboxes = document.querySelectorAll(`#${tabName}-categories-checkboxes input[type="checkbox"]`);
+                allCheckboxes.forEach(cb => cb.checked = false);
+                
+                let preview = document.getElementById(`${tabName}-preview`);
+                if (preview) {
+                    preview.style.backgroundImage = '';
+                }
+                
+                let fileNameDiv = document.getElementById(`${tabName}-file-name`);
+                if (fileNameDiv) {
+                    fileNameDiv.textContent = '';
+                }
             }
             
-            // Очистка полей
-            document.getElementById(`${tabName}-name`).value = '';
-            
-            if (tabName === 'мануалы') {
-                document.getElementById(`${tabName}-minutes`).value = '';
-                document.getElementById(`${tabName}-text`).value = '';
-            } else if (tabName === 'розыгрыши') {
-                document.getElementById(`${tabName}-prizes`).value = '';
-                document.getElementById(`${tabName}-detail`).value = '';
-            } else if (tabName === 'полезные инструменты') {
-                document.getElementById(`${tabName}-desc`).value = '';
-                document.getElementById(`${tabName}-link`).value = '';
+            // Обработка изображения
+            if (imageFile?.files && imageFile.files[0]) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    item.image = e.target.result;
+                    
+                    // Обработка текстового файла
+                    if (textFile?.files && textFile.files[0]) {
+                        let textReader = new FileReader();
+                        textReader.onload = function(e) {
+                            item.fileContent = e.target.result;
+                            finalizeItem();
+                        };
+                        textReader.readAsText(textFile.files[0]);
+                    } else {
+                        finalizeItem();
+                    }
+                };
+                reader.readAsDataURL(imageFile.files[0]);
+            } else if (textFile?.files && textFile.files[0]) {
+                // Только текстовый файл
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    item.fileContent = e.target.result;
+                    finalizeItem();
+                };
+                reader.readAsText(textFile.files[0]);
             } else {
-                document.getElementById(`${tabName}-size`).value = '';
-                document.getElementById(`${tabName}-desc`).value = '';
-                document.getElementById(`${tabName}-link`).value = '';
-            }
-            
-            // Снимаем все чекбоксы
-            let allCheckboxes = document.querySelectorAll(`#${tabName}-categories-checkboxes input[type="checkbox"]`);
-            allCheckboxes.forEach(cb => cb.checked = false);
-            
-            let preview = document.getElementById(`${tabName}-preview`);
-            if (preview) {
-                preview.style.backgroundImage = '';
+                // Нет файлов
+                finalizeItem();
             }
         };
 
