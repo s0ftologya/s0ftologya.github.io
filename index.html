@@ -1394,7 +1394,8 @@
             });
             
             loadFromFirebase('tabComments', (data) => {
-                tabComments = data || {};
+                if (data) tabComments = data;
+                else tabComments = {};
             });
             
             loadFromFirebase('categoriesData', (data) => {
@@ -2064,12 +2065,10 @@
                 
                 <div class="admin-section">
                     <h4 style="color:#B22222;">настройки</h4>
-                    <div class="checkbox-item">
-                        <label>
-                            <input type="checkbox" id="comments-${tabName}" ${tabComments[tabName] ? 'checked' : ''} onchange="toggleComments('${tabName}')">
-                            включить комментарии
-                        </label>
-                    </div>
+                    <label class="checkbox-item" style="cursor: pointer; user-select: none; width: 100%;">
+                        <input type="checkbox" id="comments-${tabName}" ${tabComments[tabName] ? 'checked' : ''} onchange="toggleComments('${tabName}')" style="display: inline-block; width: 18px; height: 18px; margin-right: 8px;">
+                        <span style="font-size: 1rem;">включить комментарии</span>
+                    </label>
                 </div>
                 
                 <div class="admin-section">
@@ -2112,8 +2111,10 @@
         }
 
         window.toggleComments = (tabName) => {
-            tabComments[tabName] = document.getElementById(`comments-${tabName}`).checked;
+            const checkbox = document.getElementById(`comments-${tabName}`);
+            tabComments[tabName] = checkbox.checked;
             saveAll();
+            console.log('Comments toggled:', tabName, tabComments[tabName]);
         };
 
         window.previewImage = function(input, previewId) {
